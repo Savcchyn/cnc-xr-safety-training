@@ -237,41 +237,37 @@ export class World {
     new OBJLoader().load(
       `${import.meta.env.BASE_URL}models/lathe/cnc-lathe.obj`,
       (obj) => {
-        // Farbschema nach Referenz-Render: weißes Gehäuse, navy Basis &
-        // Rückwand, dunkles Sichtfenster, Chrom-Trim, leuchtender Screen
+        // Original-Texturen des Modells: Diffuse + Normal + Illum pro
+        // Materialgruppe, Opacity-Maske für die Lüftungsgitter der Basis
+        const texLoader = new THREE.TextureLoader()
+        const base = `${import.meta.env.BASE_URL}models/lathe/textures/`
+        const tex = (file, srgb = false) => {
+          const t = texLoader.load(base + file)
+          if (srgb) t.colorSpace = THREE.SRGBColorSpace
+          return t
+        }
+        const makeMat = (prefix, extra = {}) =>
+          new THREE.MeshStandardMaterial({
+            map: tex(`${prefix}_diffuse.png`, true),
+            normalMap: tex(`${prefix}_normal.png`),
+            emissiveMap: tex(`${prefix}_illum.png`, true),
+            emissive: 0xffffff,
+            emissiveIntensity: 0.75,
+            roughness: 0.5,
+            ...extra,
+          })
         const MATS = {
-          white: new THREE.MeshStandardMaterial({ color: 0xf0efec, roughness: 0.42 }),
-          navy: new THREE.MeshStandardMaterial({ color: 0x2b3040, roughness: 0.55 }),
-          navyDark: new THREE.MeshStandardMaterial({ color: 0x222634, roughness: 0.6 }),
-          glass: new THREE.MeshStandardMaterial({
-            color: 0x1d2126,
-            roughness: 0.15,
-            metalness: 0.4,
+          front: makeMat('Modern_Lathe_front'),
+          body: makeMat('Modern_Lathe_body', {
+            alphaMap: tex('Modern_Lathe_body_opacity.png'),
+            alphaTest: 0.4,
           }),
-          chrome: new THREE.MeshStandardMaterial({
-            color: 0xb9bdc4,
-            roughness: 0.28,
-            metalness: 0.75,
-          }),
-          screen: new THREE.MeshStandardMaterial({
-            color: 0x10151a,
-            roughness: 0.3,
-            emissive: 0x0e3644,
-            emissiveIntensity: 0.9,
-          }),
-          keys: new THREE.MeshStandardMaterial({ color: 0x33363c, roughness: 0.6 }),
-          armGray: new THREE.MeshStandardMaterial({ color: 0xd8d6d1, roughness: 0.5 }),
+          control: makeMat('main_control'),
         }
         const pick = (name) => {
-          if (name.includes('display')) return MATS.screen
-          if (name.includes('_kb')) return MATS.keys
-          if (name.includes('grid')) return MATS.navyDark
-          if (name.includes('door')) return MATS.glass
-          if (name.includes('logo')) return MATS.navy
-          if (name.includes('detail')) return MATS.chrome
-          if (name.includes('control')) return MATS.armGray
-          if (name.includes('body')) return MATS.navy
-          return MATS.white
+          if (name.startsWith('main_control')) return MATS.control
+          if (name.includes('body')) return MATS.body
+          return MATS.front
         }
         obj.traverse((o) => {
           if (!o.isMesh) return
