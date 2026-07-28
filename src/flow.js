@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import { CSS3DSprite } from 'three/examples/jsm/renderers/CSS3DRenderer.js'
 import { content } from './content.js'
 import { GEAR_SVG } from './world.js'
-import { playNotifSound, playWoodCrack } from './audio.js'
+import { playNotifSound, playWoodCrack, playFireSound, playWaterSound } from './audio.js'
 import {
   buildStartPanel,
   buildModulePanel,
@@ -22,6 +22,11 @@ import {
   buildCheckpointPlacedPanel,
   buildTutorialPanel,
   buildNotificationEditor,
+  buildOnboardingInfo,
+  buildOnboardingNav,
+  buildErrorCard,
+  buildReviewErrorControls,
+  buildModuleEditor,
 } from './panels.js'
 
 import { U } from './units.js'
@@ -33,20 +38,30 @@ const V3m = (x, y, z) => new THREE.Vector3(x, y, z)
 
 // Diese Panels billboarden im Modul: ihre Z-Achse (Front) folgt dem User,
 // sie bleiben dabei aufrecht (Rotation nur um die Hochachse)
-const BILLBOARD_PANELS = ['checkin', 'timer', 'notifications', 'miniChecklist']
+const BILLBOARD_PANELS = ['checkin', 'timer', 'notifications', 'miniChecklist', 'obInfo', 'obNav']
 
 // Virtuelle Hand (Material "touch_app"), die nach einer Task-Entscheidung
 // die Aktion an der Maschine ausführt
 const HAND_SVG = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 11.24V7.5C9 6.12 10.12 5 11.5 5S14 6.12 14 7.5v3.74c1.21-.81 2-2.18 2-3.74C16 5.01 13.99 3 11.5 3S7 5.01 7 7.5c0 1.56.79 2.93 2 3.74zm9.84 4.63l-4.54-2.26c-.17-.07-.35-.11-.54-.11H13v-6c0-.83-.67-1.5-1.5-1.5S10 6.67 10 7.5v10.74l-3.43-.72c-.08-.01-.15-.03-.24-.03-.31 0-.59.13-.79.33l-.79.8 4.94 4.94c.27.27.65.44 1.06.44h6.79c.75 0 1.33-.55 1.44-1.28l.75-5.27c.01-.07.02-.14.02-.2 0-.62-.38-1.16-.91-1.38z"/></svg>`
 
-// Positionen der Interaktionspunkte (lokal zur Maschinen-Gruppe,
-// abgestimmt auf die geladenen GLB-Modelle)
+// Positionen der Interaktionspunkte pro Maschine (lokal zur
+// Maschinen-Gruppe, abgestimmt auf die geladenen GLB-Modelle)
 const HOTSPOT_POSITIONS = {
-  'panel-top': V3m(-0.3, 1.78, 1.15),
-  'panel-estop': V3m(-1.18, 1.2, 1.3),
-  'cabinet-door': V3m(-0.74, 0.5, 1.25),
-  spindle: V3m(0.62, 1.62, 0.8),
-  table: V3m(1.55, 1.18, 1.0),
+  m1: {
+    'panel-top': V3m(-0.3, 1.78, 1.15),
+    'panel-estop': V3m(-1.18, 1.2, 1.3),
+    'cabinet-door': V3m(-0.74, 0.5, 1.25),
+    spindle: V3m(0.62, 1.62, 0.8),
+    table: V3m(1.55, 1.18, 1.0),
+  },
+  // Maschine 2: vertikale Fräsmaschine — Module/Tasks beispielhaft angebaut
+  m2: {
+    'panel-top': V3m(0.75, 1.65, 0.6),
+    'panel-estop': V3m(0.85, 1.15, 0.7),
+    'cabinet-door': V3m(-0.7, 0.7, 0.7),
+    spindle: V3m(0, 1.55, 0.55),
+    table: V3m(-0.15, 1.05, 0.85),
+  },
 }
 
 export class Flow {
@@ -60,6 +75,8 @@ export class Flow {
     this.state = null
     this.selections = { machine: null, level: null, space: null }
     this.mode = 'space'
+    this.machineKey = 'm1'
+    this.onboardingStep = 0
     this.timers = []
     this.hotspots = []
     this.tasks = []
@@ -97,8 +114,22 @@ export class Flow {
     this.panels.tutorial = buildTutorialPanel(() => this.showPanel('tutorial', false))
 
     this.panels.modules = buildModulePanel(
-      () => this.setState('preChecklist'),
+      // Anfänger bekommen zuerst das geführte Onboarding
+      () => this.setState(this.selections.level === 0 ? 'onboarding' : 'preChecklist'),
       () => this.setState('start')
+    )
+
+    this.panels.obInfo = buildOnboardingInfo()
+    this.panels.obNav = buildOnboardingNav(
+      () => this.applyOnboardingStep(this.onboardingStep - 1),
+      () => {
+        if (this.onboardingStep >= content.tasks.length - 1) {
+          this.setState('preChecklist')
+        } else {
+          this.applyOnboardingStep(this.onboardingStep + 1)
+        }
+      },
+      () => this.setState('modules')
     )
 
     this.panels.preChecklist = buildPreChecklistPanel(
@@ -124,14 +155,31 @@ export class Flow {
       () => this.setState('review')
     )
 
-    this.panels.review = buildReviewPanel(() => this.setState('modules'))
+    this.panels.review = buildReviewPanel(
+      () => this.setState('modules'),
+      () => this.setState('reviewErrors')
+    )
+
+    this.panels.reviewControls = buildReviewErrorControls(
+      () => this.runCorrectSimulation(),
+      () => this.setState('review')
+    )
 
     this.panels.cms = buildCmsPanel({
       back: () => this.setState('start'),
       prototypeOnly: () => this.toast(content.prototypeOnly),
       editNotifications: () => this.swapCmsRight('cmsNotifications'),
       selectModule: () => this.swapCmsRight('cmsChecklist'),
+      addModule: () => this.swapCmsRight('cmsModuleEditor'),
     })
+
+    this.panels.cmsModuleEditor = buildModuleEditor(
+      () => this.swapCmsRight('cmsChecklist'),
+      () => {
+        this.toast(content.moduleEditor.saved)
+        this.swapCmsRight('cmsChecklist')
+      }
+    )
 
     this.panels.cmsChecklist = buildCmsChecklistPanel(
       () => this.swapCmsRight('cmsEditor'),
@@ -147,7 +195,11 @@ export class Flow {
 
     this.panels.cmsNotifications = buildNotificationEditor(
       () => this.swapCmsRight('cmsChecklist'),
-      () => {
+      (entries) => {
+        // Bearbeitete Nachrichten übernehmen und den Trainings-Stack neu aufbauen
+        content.notifications.length = 0
+        content.notifications.push(...entries)
+        this.panels.notifications.rebuild()
         this.toast(content.notificationsSaved)
         this.swapCmsRight('cmsChecklist')
       }
@@ -187,9 +239,11 @@ export class Flow {
     this.hideAllPanels()
     this.clearTimers()
     this.clearHotspots()
+    this.clearErrorCards()
     this.releaseGrab()
     if (this.mini.grabbed) this.dropMini()
     this.world.clearConsequence()
+    this.world.hideHand()
 
     const go = (pos, look, dur) => this.controls.goTo(V3(...pos), V3(...look), dur)
 
@@ -238,6 +292,8 @@ export class Flow {
         const scenario = ['fire', 'water', 'wood'][Math.floor(Math.random() * 3)]
         this.world.showConsequence(scenario)
         if (scenario === 'wood') playWoodCrack()
+        else if (scenario === 'fire') playFireSound()
+        else playWaterSound()
         this.markHotspotResults()
         this.spawnHotspots(false)
         this.showPanel('consequence', true, V3(0.1, 1.85, 1.9))
@@ -252,7 +308,8 @@ export class Flow {
       }
 
       case 'cms': {
-        this.world.gearField.visible = false
+        // Content Dashboard bekommt Glow (im Panel) und die Zahnrad-Bubbles
+        this.world.gearField.visible = true
         this.world.setMachineMode(this.mode === 'mini' ? 'mini' : 'space')
         this.showPanel('cms', true, V3(-0.95, 1.75, 1.9), 0.12)
         this.cmsRight = 'cmsChecklist'
@@ -273,7 +330,123 @@ export class Flow {
         go([0, 1.65, 4.4], [0, 1.7, 0], 0.9)
         break
       }
+
+      case 'onboarding': {
+        // Geführtes Onboarding für Anfänger: Checkliste bleibt sichtbar,
+        // die virtuelle Hand erledigt alle Tasks der Reihe nach korrekt.
+        this.world.gearField.visible = false
+        this.world.setMachineMode(this.mode)
+        this.tasks = content.tasks.map((t) => ({ ...t, answered: null }))
+        this.spawnHotspots(false)
+
+        this.panels.miniChecklist.setBadgeVisible(false)
+        if (this.mode === 'mini') {
+          this.showPanel('miniChecklist', true, V3(-2.9, 1.9, 2.6), 0.35)
+          this.showPanel('obNav', true, V3(0.4, 1.05, 3.4))
+          go([0.3, 1.75, 5.5], [-0.3, 0.95, 1.6], 1.2)
+        } else {
+          this.showPanel('miniChecklist', true, V3(-3.1, 1.85, 2.2), 0.4)
+          this.showPanel('obNav', true, V3(-0.3, 1.0, 3.5))
+          go([-0.5, 1.75, 5.6], [-1.1, 1.3, 0.2], 1.2)
+        }
+        this.showPanel('obInfo', true, V3(0, 1.8, 2.0))
+        this.applyOnboardingStep(0)
+        break
+      }
+
+      case 'reviewErrors': {
+        // Fehler-Erklärungen direkt an den Task Points + korrekte Simulation
+        this.world.setMachineMode(this.mode)
+        this.markHotspotResults()
+        this.spawnHotspots(false)
+        this.spawnErrorCards()
+        this.showPanel('reviewControls', true, V3(0.1, 0.95, 3.4))
+        const wrong = this.tasks.filter((t) => t.answered !== t.correct)
+        if (!wrong.length) this.toast(content.reviewErrors.noErrors)
+        go([-0.3, 1.75, 5.5], [-0.8, 1.25, 0.2], 1.1)
+        break
+      }
     }
+  }
+
+  /* ---------------- Onboarding ---------------- */
+
+  applyOnboardingStep(index) {
+    const n = this.tasks.length
+    this.onboardingStep = THREE.MathUtils.clamp(index, 0, n - 1)
+    const positions = HOTSPOT_POSITIONS[this.machineKey] || HOTSPOT_POSITIONS.m1
+
+    this.hotspots.forEach((sprite, i) => {
+      sprite.element.classList.toggle('answered', i < this.onboardingStep)
+      sprite.element.classList.toggle('active', i === this.onboardingStep)
+    })
+
+    const task = this.tasks[this.onboardingStep]
+    const pos = positions[task.id]
+
+    // Hand führt den Schritt aus
+    this.world.moveHandTo(pos)
+
+    // Erklär-Panel über dem aktiven Punkt (Weltkoordinaten der Maschine);
+    // Mindesthöhe, damit es nie hinter der Schritt-Navigation verschwindet
+    const worldPos = pos.clone().applyMatrix4(this.world.machine.matrixWorld)
+    worldPos.y = Math.max(worldPos.y + 0.5 * U, 1.75 * U)
+    worldPos.z += 0.55 * U
+    worldPos.x += 0.4 * U
+    this.panels.obInfo.setStep(task)
+    this.panels.obInfo.object.position.copy(worldPos)
+
+    this.panels.obNav.setStep(this.onboardingStep, n)
+  }
+
+  /* ---------------- Fehler-Review ---------------- */
+
+  spawnErrorCards() {
+    this.clearErrorCards()
+    const positions = HOTSPOT_POSITIONS[this.machineKey] || HOTSPOT_POSITIONS.m1
+    for (const task of this.tasks) {
+      if (task.answered === task.correct) continue
+      const card = buildErrorCard(task)
+      const worldPos = positions[task.id].clone().applyMatrix4(this.world.machine.matrixWorld)
+      worldPos.y += 0.42 * U
+      worldPos.z += 0.3 * U
+      card.object.position.copy(worldPos)
+      this.scene.add(card.object)
+      this.errorCards.push(card.object)
+    }
+  }
+
+  clearErrorCards() {
+    if (!this.errorCards) this.errorCards = []
+    for (const c of this.errorCards) c.removeFromParent()
+    this.errorCards = []
+  }
+
+  /** Die 3D-Hand führt alle falsch beantworteten Tasks korrekt aus. */
+  runCorrectSimulation() {
+    const positions = HOTSPOT_POSITIONS[this.machineKey] || HOTSPOT_POSITIONS.m1
+    const wrong = this.tasks
+      .map((task, i) => ({ task, sprite: this.hotspots[i] }))
+      .filter(({ task }) => task.answered !== task.correct)
+
+    if (!wrong.length) {
+      this.toast(content.reviewErrors.noErrors)
+      return
+    }
+
+    wrong.forEach(({ task, sprite }, i) => {
+      this.setTimer(() => {
+        this.world.moveHandTo(positions[task.id])
+        this.setTimer(() => {
+          sprite.element.classList.remove('bad')
+          sprite.element.classList.add('ok')
+        }, 1.2)
+      }, i * 2.2)
+    })
+    this.setTimer(() => {
+      this.world.hideHand()
+      this.toast(content.reviewErrors.simulationDone)
+    }, wrong.length * 2.2 + 0.5)
   }
 
   /* ---------------- Startscreen ---------------- */
@@ -286,7 +459,10 @@ export class Flow {
       this.world.gearField.visible = false
     }
     if (key === 'machine') {
-      // Maschine erscheint hinter dem Panel (Trainings Selection)
+      // Maschine erscheint hinter dem Panel (Trainings Selection);
+      // Maschine 2 = Fräsmaschinen-Modell, 1 & 3 = Holzfräse
+      this.machineKey = index === 1 ? 'm2' : 'm1'
+      this.world.setMachineVariant(this.machineKey)
       this.world.gearField.visible = false
       this.world.setMachineMode(this.mode)
     }
@@ -346,6 +522,7 @@ export class Flow {
 
   spawnHotspots(interactive) {
     this.clearHotspots()
+    const positions = HOTSPOT_POSITIONS[this.machineKey] || HOTSPOT_POSITIONS.m1
     for (const task of this.tasks.length ? this.tasks : content.tasks) {
       const el = document.createElement('div')
       el.className = 'gear-hotspot'
@@ -353,7 +530,7 @@ export class Flow {
       el.style.pointerEvents = interactive ? 'auto' : 'none'
       const sprite = new CSS3DSprite(el)
       sprite.scale.setScalar(0.0022)
-      sprite.position.copy(HOTSPOT_POSITIONS[task.id])
+      sprite.position.copy(positions[task.id])
       sprite.userData.task = task
       if (interactive) {
         el.addEventListener('click', () => this.openTask(sprite))
@@ -403,8 +580,19 @@ export class Flow {
     }, 0.35)
   }
 
-  /** Virtuelle Hand erscheint am Interaktionspunkt und drückt die Eingabe. */
+  /**
+   * Virtuelle Hand erscheint am Interaktionspunkt und drückt die Eingabe.
+   * Nutzt die gerigte 3D-Hand (FBX); Fallback: flaches Hand-Sprite.
+   */
   playHandSimulation(sprite) {
+    if (this.world.handReady) {
+      const start = sprite.position.clone().add(new THREE.Vector3(0.45, -0.45, 0.5))
+      this.world.hand.position.copy(start)
+      this.world.moveHandTo(sprite.position)
+      this.setTimer(() => this.world.hideHand(), 1.7)
+      return
+    }
+
     const el = document.createElement('div')
     el.className = 'hand-sim'
     el.innerHTML = `<div class="hand-inner">${HAND_SVG}</div>`
@@ -427,6 +615,7 @@ export class Flow {
     // Ganz außen links im Bogen — überlappt weder Timer noch Notifications.
     // Der Blick schwenkt zum Cluster und nach dem Ausblenden wieder zurück.
     const pos = this.mode === 'mini' ? V3(-4.15, 1.9, 2.95) : V3(-4.35, 1.85, 2.35)
+    this.panels.miniChecklist.setBadgeVisible(true)
     this.showPanel('miniChecklist', true, pos, 0.42)
     this.controls.goTo(this.controls.position.clone(), this.checklistLook, 0.8)
 

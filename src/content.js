@@ -115,7 +115,7 @@ export const content = {
     // Timer zählt vorwärts ab 00:00 — er dokumentiert die Trainingszeit
     // zur Einordnung, es läuft keine Zeit ab.
     checklistViews: 3,
-    checklistViewSeconds: 15,
+    checklistViewSeconds: 10,
   },
 
   // Spatial Tasks: Interaktionspunkte an der Maschine.
@@ -171,7 +171,7 @@ export const content = {
   ],
 
   consequence: {
-    titleTemplate: (skipped, total) => `${skipped} von ${total} Schritten übersprungen!`,
+    titleTemplate: (skipped, total) => `${skipped} von ${total} Schritte übersprungen!`,
     text: 'Einige Punkte der Sicherheitscheckliste wurden nicht ausgeführt.\nDie folgende Simulation zeigt eine mögliche Folge.',
     repeat: 'Modul wiederholen',
     leave: 'Modul verlassen',
@@ -183,6 +183,71 @@ export const content = {
     leftLabel: 'Wo die Routine bricht',
     rightLabel: 'Dein Muster',
     button: 'Zur Modulauswahl',
+    errorsButton: 'Fehler an den Task Points ansehen',
+  },
+
+  reviewErrors: {
+    runSimulation: 'Korrekte Simulation ausführen',
+    backToProfile: 'Zurück zum Profil',
+    simulationDone: 'Korrekte Simulation abgeschlossen.',
+    noErrors: 'Keine Fehler — alle Task Points waren korrekt.',
+    cardKicker: 'Richtig wäre:',
+  },
+
+  // Erklärungen pro Task Point — für Onboarding und Fehler-Review
+  taskExplanations: {
+    'panel-top': {
+      action: 'Nullpunkte einmessen',
+      text: 'Werkzeuglängen und Nullpunkte müssen vor dem Start korrekt eingemessen sein.\nSonst fährt die Maschine mit falschen Referenzen ins Material.',
+    },
+    'panel-estop': {
+      action: 'Nullpunkte unverändert lassen',
+      text: 'Die Referenzen stimmen bereits.\nUnnötiges Umstellen erzeugt Fehlpositionen beim nächsten Programmlauf.',
+    },
+    'cabinet-door': {
+      action: 'Werkzeug auf Beschädigung prüfen',
+      text: 'Risse oder Ausbrüche an der Schneide führen zu Werkzeugbruch\nund unkontrolliert fliegenden Teilen.',
+    },
+    spindle: {
+      action: 'Spannmittel auf festen Sitz kontrollieren',
+      text: 'Lose Spannmittel können sich bei der Bearbeitung lösen —\ndas Werkstück wird zum Geschoss.',
+    },
+    table: {
+      action: 'Kühlschmierstoff-Zufuhr prüfen',
+      text: 'Ohne Kühlschmierstoff überhitzen Werkzeug und Werkstück.\nBrandgefahr und Werkzeugverschleiß steigen stark an.',
+    },
+  },
+
+  onboarding: {
+    kicker: 'Onboarding',
+    stepLabel: (i, n) => `Arbeitsschritt ${i} von ${n}`,
+    intro:
+      'Schau zu, wie die Arbeitsschritte des Moduls korrekt ausgeführt werden.\nMit den Pfeilen schaltest du vor und zurück.',
+    startTraining: 'Training starten',
+    back: 'zurück',
+  },
+
+  moduleEditor: {
+    kicker: 'Neues Modul',
+    titlePlaceholder: 'Modul 7 — Name eingeben',
+    checkpointsLabel: 'Checkpoints',
+    tasksLabel: 'Verknüpfte Tasks',
+    addCheckpoint: 'Checkpoint hinzufügen',
+    addTask: 'Task hinzufügen',
+    save: 'Modul speichern',
+    saved: 'Modul gespeichert (Beispiel — Prototyp).',
+    exampleCheckpoint: 'Neuer Checkpoint — Text eingeben',
+    exampleTask: 'Richtige Antwort eingeben',
+  },
+
+  notifEditor: {
+    senderLabel: 'Absender',
+    timeLabel: 'Zeit',
+    textLabel: 'Nachricht',
+    add: 'Nachricht hinzufügen',
+    newSender: 'Neuer Absender',
+    newTime: 'Gerade eben',
+    newText: 'Neue Nachricht — Text eingeben',
   },
 
   cms: {

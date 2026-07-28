@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { CSS3DSprite } from 'three/examples/jsm/renderers/CSS3DRenderer.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js'
 import { U } from './units.js'
 
 export const GEAR_SVG = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>`
@@ -48,14 +49,39 @@ export class World {
     this.setupLights()
     this.setupGround()
 
-    // Maschinen-Gruppe: zunächst Platzhalter-Boxen, wird durch das
-    // GLB-Modell der Holzfräse ersetzt, sobald es geladen ist.
+    // Maschinen-Gruppe: zunächst Platzhalter-Boxen, wird durch die
+    // GLB-Modelle ersetzt, sobald sie geladen sind. Enthält zwei
+    // Varianten: m1 (Holzfräse) und m2 (Fräsmaschine).
     this.machine = new THREE.Group()
     this.machine.visible = false
     this.placeholder = this.buildMachine()
     this.machine.add(this.placeholder)
     scene.add(this.machine)
+    this.variant = 'm1'
+    // Effekt-Regionen pro Maschinen-Variante (lokale Meter)
+    this.effectConfig = {
+      m1: {
+        fireSpots: [
+          [0.55, 1.75, 0],
+          [1.4, 1.25, -0.4],
+          [0.9, 1.25, 0.55],
+          [-0.78, 2.05, 0.55],
+          [1.7, 1.35, 0.4],
+        ],
+        splinter: { x: [0.1, 1.1], y: [1.12, 1.25], z: [-0.35, 0.35] },
+      },
+      m2: {
+        fireSpots: [
+          [0, 1.9, 0],
+          [-0.5, 1.2, 0.4],
+          [0.55, 1.3, 0.3],
+          [0, 1.1, 0.7],
+        ],
+        splinter: { x: [-0.45, 0.45], y: [1.0, 1.15], z: [-0.25, 0.35] },
+      },
+    }
     this.loadMachineModel()
+    this.loadHand()
 
     this.gearField = this.buildGearField()
     this.gearField.scale.setScalar(U)
@@ -145,17 +171,32 @@ export class World {
     Promise.allSettled([
       loadGLB('cnc-wooden-001.glb'),
       loadGLB('cnc-control-panel.glb'),
-    ]).then(([router, panel]) => {
+      loadGLB('cnc-milling-001.glb'),
+    ]).then(([router, panel, milling]) => {
       if (router.status !== 'fulfilled') {
         console.error('[world] Fräsen-GLB fehlt:', router.reason)
         return
       }
       this.placeholder.removeFromParent()
 
-      // Holzfräse: Länge ≈ 3.2 m, leicht nach rechts versetzt
+      // Maschine 1: Holzfräse, Länge ≈ 3.2 m, leicht nach rechts versetzt
+      this.m1 = new THREE.Group()
       this.model = normalize(router.value, 3.2)
       this.model.position.set(0.4, 0, 0)
-      this.machine.add(this.model)
+      this.m1.add(this.model)
+      this.machine.add(this.m1)
+
+      // Maschine 2: Fräsmaschine (vertikal), Fußabdruck ≈ 2.2 m
+      if (milling.status === 'fulfilled') {
+        this.m2 = new THREE.Group()
+        const mill = normalize(milling.value, 2.2)
+        this.m2.add(mill)
+        this.m2.visible = false
+        this.machine.add(this.m2)
+      } else {
+        console.error('[world] Milling-GLB fehlt:', milling.reason)
+      }
+      this.setMachineVariant(this.variant)
 
       // Control Panel: liegt im GLB flach → aufrichten (rotX 90°),
       // auf Konsolenbreite skalieren und bündig auf die Pult-Front
@@ -171,12 +212,85 @@ export class World {
         box = new THREE.Box3().setFromObject(wrapper)
         const center = box.getCenter(new THREE.Vector3())
         wrapper.position.set(-0.755 - center.x, 1.31 - center.y, 1.2 - box.min.z)
-        this.machine.add(wrapper)
+        this.m1.add(wrapper)
         this.controlPanel = wrapper
       } else {
         console.error('[world] Bedienpult-GLB fehlt:', panel.reason)
       }
     })
+  }
+
+  /**
+   * Maschinen-Variante wählen: 'm1' Holzfräse (auch Fallback für
+   * Maschine 3), 'm2' Fräsmaschine. Effekte nutzen die passende Region.
+   */
+  setMachineVariant(key) {
+    this.variant = key === 'm2' && this.m2 ? 'm2' : 'm1'
+    if (this.m1) this.m1.visible = this.variant === 'm1'
+    if (this.m2) this.m2.visible = this.variant === 'm2'
+  }
+
+  /**
+   * Gerigte 3D-Hand (FBX) laden — genutzt für Task-Simulationen,
+   * Onboarding und die korrekte Simulation im Fehler-Review.
+   */
+  loadHand() {
+    const loader = new FBXLoader()
+    loader.load(
+      `${import.meta.env.BASE_URL}models/simplehand.fbx`,
+      (fbx) => {
+        const mint = new THREE.MeshStandardMaterial({
+          color: 0x9fd3b6,
+          roughness: 0.55,
+          transparent: true,
+          opacity: 0.95,
+        })
+        fbx.traverse((o) => {
+          if (o.isMesh || o.isSkinnedMesh) {
+            o.material = mint
+            o.castShadow = true
+            o.frustumCulled = false
+          }
+        })
+
+        // Auf Handgröße normalisieren (~0.3 m längste Seite)
+        const box = new THREE.Box3().setFromObject(fbx)
+        const size = box.getSize(new THREE.Vector3())
+        const scale = 0.3 / Math.max(size.x, size.y, size.z)
+        fbx.scale.setScalar(scale)
+
+        const wrapper = new THREE.Group()
+        const scaled = new THREE.Box3().setFromObject(fbx)
+        const center = scaled.getCenter(new THREE.Vector3())
+        fbx.position.sub(center)
+        // Finger zeigen schräg nach oben zum Interaktionspunkt
+        fbx.rotation.set(-0.7, 0, 0.35)
+        wrapper.add(fbx)
+        wrapper.visible = false
+
+        this.machine.add(wrapper)
+        this.hand = wrapper
+        this.handTarget = new THREE.Vector3()
+        this.handReady = true
+        console.log('[world] Hand-FBX geladen, Skalierung:', scale.toFixed(4))
+      },
+      undefined,
+      (err) => console.error('[world] Hand-FBX konnte nicht geladen werden:', err)
+    )
+  }
+
+  /** Hand einblenden und (weich) zu einer maschinen-lokalen Position schicken. */
+  moveHandTo(localPos, instant = false) {
+    if (!this.handReady) return
+    this.hand.visible = true
+    // Versatz neben die Task-Bubble, damit die Hand nicht von der
+    // CSS3D-Bubble verdeckt wird (DOM liegt immer über WebGL)
+    this.handTarget.copy(localPos).add(new THREE.Vector3(0.3, -0.3, 0.32))
+    if (instant) this.hand.position.copy(this.handTarget)
+  }
+
+  hideHand() {
+    if (this.hand) this.hand.visible = false
   }
 
   /** Portalfräse mit Frästisch, Werkstück, Portal + separates Bedienpult (Platzhalter/Fallback). */
@@ -279,6 +393,11 @@ export class World {
     this.splinters = []
   }
 
+  /* Effekt-Region der aktiven Maschinen-Variante */
+  get effects() {
+    return this.effectConfig[this.variant] || this.effectConfig.m1
+  }
+
   /** Große Wasserpfütze unter und neben der Fräse (Leckage-Szenario). */
   spawnWater() {
     const group = new THREE.Group()
@@ -328,6 +447,7 @@ export class World {
     const rng = (a, b) => a + Math.random() * (b - a)
 
     this.splinters = []
+    const region = this.effects.splinter
     const count = 30
     for (let i = 0; i < count; i++) {
       const big = i < 5 // ein paar größere Bruchstücke
@@ -336,7 +456,7 @@ export class World {
         : new THREE.BoxGeometry(rng(0.04, 0.15), 0.014, rng(0.015, 0.05))
       const mesh = new THREE.Mesh(geo, mats[i % mats.length])
       mesh.castShadow = true
-      mesh.position.set(rng(0.1, 1.1), rng(1.12, 1.25), rng(-0.35, 0.35))
+      mesh.position.set(rng(...region.x), rng(...region.y), rng(...region.z))
       mesh.rotation.set(rng(0, 3), rng(0, 3), rng(0, 3))
       group.add(mesh)
       this.splinters.push({
@@ -354,13 +474,7 @@ export class World {
   /** Feuer-Sprites auf der Maschine (Konsequenz-Simulation). */
   igniteFire() {
     this.clearFire()
-    const spots = [
-      [0.55, 1.75, 0],
-      [1.4, 1.25, -0.4],
-      [0.9, 1.25, 0.55],
-      [-0.78, 2.05, 0.55],
-      [1.7, 1.35, 0.4],
-    ]
+    const spots = this.effects.fireSpots
     for (const [x, y, z] of spots) {
       const el = document.createElement('div')
       el.className = 'fire'
@@ -404,6 +518,13 @@ export class World {
       const { base, phase, speed } = g.userData
       g.position.y = base.y + Math.sin(t * speed + phase) * 0.14
       g.position.x = base.x + Math.cos(t * speed * 0.6 + phase) * 0.08
+    }
+
+    // Hand weich zum Ziel bewegen + sanftes Schweben
+    if (this.handReady && this.hand.visible) {
+      const k = Math.min(1, 6 * dt)
+      this.hand.position.lerp(this.handTarget, k)
+      this.hand.position.y += Math.sin(t * 2.6) * 0.006
     }
 
     // Splitter-Physik (lokale Meter innerhalb der Maschinen-Gruppe)

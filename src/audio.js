@@ -41,6 +41,93 @@ export function playNotifSound() {
   }
 }
 
+/** Feuer: tiefes Grollen + unregelmäßiges Knistern aus gefilterten Rausch-Pops. */
+export function playFireSound() {
+  try {
+    const c = getCtx()
+    const t = c.currentTime
+
+    // Grollen
+    const rumble = c.createBufferSource()
+    rumble.buffer = getNoiseBuffer(c)
+    rumble.loop = true
+    const lp = c.createBiquadFilter()
+    lp.type = 'lowpass'
+    lp.frequency.value = 220
+    const rg = c.createGain()
+    rg.gain.setValueAtTime(0, t)
+    rg.gain.linearRampToValueAtTime(0.22, t + 0.25)
+    rg.gain.setValueAtTime(0.22, t + 2.2)
+    rg.gain.exponentialRampToValueAtTime(0.001, t + 3.0)
+    rumble.connect(lp).connect(rg).connect(c.destination)
+    rumble.start(t)
+    rumble.stop(t + 3.1)
+
+    // Knistern: viele kurze Pops
+    for (let i = 0; i < 22; i++) {
+      const start = Math.random() * 2.4
+      const src = c.createBufferSource()
+      src.buffer = getNoiseBuffer(c)
+      const bp = c.createBiquadFilter()
+      bp.type = 'bandpass'
+      bp.frequency.value = 1400 + Math.random() * 3200
+      bp.Q.value = 3
+      const g = c.createGain()
+      const peak = 0.05 + Math.random() * 0.14
+      g.gain.setValueAtTime(peak, t + start)
+      g.gain.exponentialRampToValueAtTime(0.001, t + start + 0.05)
+      src.connect(bp).connect(g).connect(c.destination)
+      src.start(t + start)
+      src.stop(t + start + 0.08)
+    }
+  } catch {
+    // Audio nicht verfügbar
+  }
+}
+
+/** Wasser: Platscher (Rausch-Sweep) + einzelne Tropfen-Blips. */
+export function playWaterSound() {
+  try {
+    const c = getCtx()
+    const t = c.currentTime
+
+    // Platscher
+    const splash = c.createBufferSource()
+    splash.buffer = getNoiseBuffer(c)
+    const lp = c.createBiquadFilter()
+    lp.type = 'lowpass'
+    lp.frequency.setValueAtTime(3200, t)
+    lp.frequency.exponentialRampToValueAtTime(360, t + 0.55)
+    const sg = c.createGain()
+    sg.gain.setValueAtTime(0.32, t)
+    sg.gain.exponentialRampToValueAtTime(0.001, t + 0.65)
+    splash.connect(lp).connect(sg).connect(c.destination)
+    splash.start(t)
+    splash.stop(t + 0.7)
+
+    // Tropfen
+    const drips = [
+      [0.55, 900],
+      [0.85, 1250],
+      [1.15, 780],
+    ]
+    for (const [delay, freq] of drips) {
+      const osc = c.createOscillator()
+      const g = c.createGain()
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(freq, t + delay)
+      osc.frequency.exponentialRampToValueAtTime(freq * 1.9, t + delay + 0.07)
+      g.gain.setValueAtTime(0.12, t + delay)
+      g.gain.exponentialRampToValueAtTime(0.001, t + delay + 0.14)
+      osc.connect(g).connect(c.destination)
+      osc.start(t + delay)
+      osc.stop(t + delay + 0.18)
+    }
+  } catch {
+    // Audio nicht verfügbar
+  }
+}
+
 /** Holz-Knacksen: tiefer Schlag + drei kurze Knack-Bursts aus gefiltertem Rauschen. */
 export function playWoodCrack() {
   try {

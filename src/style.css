@@ -724,10 +724,136 @@ body.mini-grabbed #hint-mini {
   border-radius: 4px;
 }
 
+/* ---------- Onboarding ---------- */
+.onboarding-info {
+  width: 660px;
+  padding: 32px 38px;
+}
+
+.onboarding-info .ob-action {
+  color: var(--orange);
+  font-size: 27px;
+  font-weight: 700;
+  margin: 6px 0 12px;
+}
+
+.onboarding-info .ob-text {
+  font-size: 17px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.onboarding-nav {
+  width: 760px;
+  padding: 30px 38px;
+  text-align: center;
+  position: relative;
+}
+
+.onboarding-nav .chip {
+  position: absolute;
+  top: 22px;
+  left: 28px;
+}
+
+.onboarding-nav .ob-intro {
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 34px 0 20px;
+  white-space: pre-line;
+  opacity: 0.9;
+}
+
+.ob-nav-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  margin-bottom: 14px;
+}
+
+.ob-arrow {
+  width: 84px;
+  font-size: 26px;
+  padding: 12px 0;
+}
+
+.ob-step-label {
+  font-size: 18px;
+  font-weight: 600;
+  min-width: 260px;
+}
+
+/* ---------- Fehler-Review ---------- */
+.error-card {
+  width: 460px;
+  padding: 24px 28px;
+  border: 1.5px solid #c0392b;
+}
+
+.error-card h4 {
+  color: var(--orange);
+  font-size: 20px;
+  margin: 4px 0 10px;
+}
+
+.error-card p {
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.review-controls {
+  width: 640px;
+  padding: 26px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ---------- Notification Editor ---------- */
+.notif-entry {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+}
+
+.notif-entry-head {
+  display: grid;
+  grid-template-columns: auto 1fr auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.notif-entry-head .answer-label {
+  margin: 0;
+}
+
+.notif-entry .field {
+  margin-bottom: 8px;
+}
+
+.notif-entry-head .field {
+  margin-bottom: 0;
+  padding: 10px 14px;
+  font-size: 14px;
+}
+
 /* ---------- CMS ---------- */
 .cms-panel {
   width: 980px;
   padding: 40px 46px;
+  position: relative;
+}
+
+.cms-glow {
+  border-radius: 60px;
+  top: -70px;
+  left: -60px;
+  right: -60px;
+  bottom: -30px;
 }
 
 .chip {

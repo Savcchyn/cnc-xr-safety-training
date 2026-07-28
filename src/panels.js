@@ -212,8 +212,7 @@ export function buildTimerPanel() {
 /* ---------------- Zeitdruck-Nachrichten ---------------- */
 
 export function buildNotificationStack() {
-  const panel = makePanel(
-    'notif-stack',
+  const render = () =>
     content.notifications
       .map(
         (n, i) => `
@@ -227,13 +226,17 @@ export function buildNotificationStack() {
         </div>`
       )
       .join('')
-  )
+
+  const panel = makePanel('notif-stack', render())
   panel.show = (i) => {
     const el = panel.el.querySelector(`[data-notif="${i}"]`)
     if (el) el.classList.add('visible')
   }
   panel.reset = () =>
     panel.el.querySelectorAll('.notif').forEach((n) => n.classList.remove('visible'))
+  panel.rebuild = () => {
+    panel.el.innerHTML = render()
+  }
   return panel
 }
 
@@ -284,6 +287,119 @@ export function buildMiniChecklist() {
   panel.setCountdown = (n) => {
     panel.el.querySelector('.countdown-badge span').textContent = n
   }
+  panel.setBadgeVisible = (v) => {
+    panel.el.querySelector('.countdown-badge').style.display = v ? 'flex' : 'none'
+  }
+  return panel
+}
+
+/* ---------------- Onboarding: Erklär-Panel + Schritt-Navigation ---------------- */
+
+export function buildOnboardingInfo() {
+  const panel = makePanel(
+    'onboarding-info',
+    `
+    <p class="kicker">${content.onboarding.kicker}</p>
+    <h3 class="ob-action"></h3>
+    <p class="ob-text"></p>
+    `
+  )
+  panel.setStep = (task) => {
+    const exp = content.taskExplanations[task.id]
+    panel.el.querySelector('.ob-action').textContent = exp?.action ?? ''
+    panel.el.querySelector('.ob-text').textContent = (exp?.text ?? '').replace(/\n/g, ' ')
+  }
+  return panel
+}
+
+export function buildOnboardingNav(onPrev, onNext, onBack) {
+  const c = content.onboarding
+  const panel = makePanel(
+    'onboarding-nav',
+    `
+    <button class="btn chip" data-action="back">${c.back}</button>
+    <p class="ob-intro">${c.intro}</p>
+    <div class="ob-nav-row">
+      <button class="btn ob-arrow" data-action="prev">◀</button>
+      <div class="ob-step-label"></div>
+      <button class="btn ob-arrow" data-action="next">▶</button>
+    </div>
+    <button class="btn primary ob-start" data-action="start" style="display:none;">${c.startTraining}</button>
+    `,
+    { prev: onPrev, next: onNext, back: onBack, start: onNext }
+  )
+  panel.setStep = (i, n) => {
+    panel.el.querySelector('.ob-step-label').textContent = c.stepLabel(i + 1, n)
+    panel.el.querySelector('[data-action="prev"]').classList.toggle('disabled', i === 0)
+    const last = i === n - 1
+    panel.el.querySelector('[data-action="next"]').style.display = last ? 'none' : 'block'
+    panel.el.querySelector('.ob-start').style.display = last ? 'block' : 'none'
+  }
+  return panel
+}
+
+/* ---------------- Fehler-Review: Erklär-Karte + Steuerung ---------------- */
+
+export function buildErrorCard(task) {
+  const exp = content.taskExplanations[task.id]
+  return makePanel(
+    'error-card',
+    `
+    <p class="kicker">${content.reviewErrors.cardKicker}</p>
+    <h4>${exp?.action ?? ''}</h4>
+    <p>${(exp?.text ?? '').replace(/\n/g, '<br/>')}</p>
+    `
+  )
+}
+
+export function buildReviewErrorControls(onRun, onBack) {
+  const c = content.reviewErrors
+  return makePanel(
+    'review-controls',
+    `
+    <button class="btn primary" data-action="run">${c.runSimulation}</button>
+    <button class="btn" data-action="back">${c.backToProfile}</button>
+    `,
+    { run: onRun, back: onBack }
+  )
+}
+
+/* ---------------- CMS: Modul-Editor (Beispiel) ---------------- */
+
+export function buildModuleEditor(onBack, onSave) {
+  const c = content.moduleEditor
+  const row = (label, cls) => `
+    <div class="edit-item">
+      <button class="icon-btn" data-action="del-row">✕</button>
+      <div class="field answer ${cls}" contenteditable="true" style="flex:1;margin-bottom:0;">${label}<span class="pencil">✎</span></div>
+    </div>`
+
+  const panel = makePanel(
+    'checkpoint-editor',
+    `
+    <button class="btn chip back-chip" data-action="back">${content.cms.back}</button>
+    <p class="kicker">${c.kicker}</p>
+    <div class="field" contenteditable="true" style="font-size:26px;font-weight:600;">${c.titlePlaceholder}<span class="pencil">✎</span></div>
+    <p class="answer-label">${c.checkpointsLabel}</p>
+    <div class="rows-checkpoints">${row(c.exampleCheckpoint, '')}</div>
+    <button class="btn cms-add cms-wide" data-action="add-checkpoint" style="margin-bottom:20px;"><span class="icon">+</span>${c.addCheckpoint}</button>
+    <p class="answer-label">${c.tasksLabel}</p>
+    <div class="rows-tasks">${row(c.exampleTask, 'correct')}</div>
+    <button class="btn cms-add cms-wide" data-action="add-task" style="margin-bottom:20px;"><span class="icon">+</span>${c.addTask}</button>
+    <button class="btn cms-add cms-wide" data-action="save"><span class="icon">💾</span>${c.save}</button>
+    `,
+    {
+      back: onBack,
+      save: onSave,
+      'add-checkpoint': () => {
+        panel.el.querySelector('.rows-checkpoints').insertAdjacentHTML('beforeend', row(c.exampleCheckpoint, ''))
+      },
+      'add-task': () => {
+        panel.el.querySelector('.rows-tasks').insertAdjacentHTML('beforeend', row(c.exampleTask, 'correct'))
+      },
+      'del-row': (t) => t.closest('.edit-item').remove(),
+    }
+  )
   return panel
 }
 
@@ -318,7 +434,7 @@ const ARC = (rot) => `
       stroke-dasharray="165 55" stroke-linecap="butt"/>
   </svg>`
 
-export function buildReviewPanel(onContinue) {
+export function buildReviewPanel(onContinue, onErrors) {
   const c = content.review
   return makePanel(
     'review-panel',
@@ -340,9 +456,10 @@ export function buildReviewPanel(onContinue) {
         <div class="viz-label">${c.rightLabel}</div>
       </div>
     </div>
+    <button class="btn primary" data-action="errors" style="font-size:20px;padding:18px;margin-bottom:16px;">${c.errorsButton}</button>
     <button class="btn" data-action="continue" style="font-size:20px;padding:18px;">${c.button}</button>
     `,
-    { continue: onContinue }
+    { continue: onContinue, errors: onErrors }
   )
 }
 
@@ -355,6 +472,7 @@ export function buildCmsPanel(handlers) {
   const panel = makePanel(
     'cms-panel',
     `
+    <div class="start-glow cms-glow"></div>
     <button class="btn chip" data-action="back">${c.back}</button>
     <h2 class="cms-title">${c.title}</h2>
     <div class="cms-row">
@@ -399,7 +517,7 @@ export function buildCmsPanel(handlers) {
       'group-next': () => step('group', 1),
       'add-machine': handlers.prototypeOnly,
       'add-group': handlers.prototypeOnly,
-      'add-module': handlers.prototypeOnly,
+      'add-module': handlers.addModule ?? handlers.prototypeOnly,
       'delete-module': handlers.prototypeOnly,
       'edit-notifications': handlers.editNotifications,
       module: (t) => {
@@ -543,25 +661,62 @@ export function buildTutorialPanel(onClose) {
   )
 }
 
-/* ---------------- Zeitdruck-Nachrichten Editor ---------------- */
+/* ---------------- Zeitdruck-Nachrichten Editor ----------------
+ * Nachrichten hinzufügen/löschen, Absender, Zeit und Text bearbeiten. */
 
 export function buildNotificationEditor(onBack, onSave) {
   const c = content.cms
+  const nc = content.notifEditor
+
+  const entry = (n) => `
+    <div class="notif-entry">
+      <div class="notif-entry-head">
+        <span class="answer-label">${nc.senderLabel}</span>
+        <div class="field answer ne-title" contenteditable="true">${n.title}</div>
+        <span class="answer-label">${nc.timeLabel}</span>
+        <div class="field answer ne-time" contenteditable="true">${n.time}</div>
+        <button class="icon-btn" data-action="del-notif">✕</button>
+      </div>
+      <span class="answer-label">${nc.textLabel}</span>
+      <div class="field answer ne-text" contenteditable="true">${n.text.replace(/\n/g, '<br/>')}</div>
+    </div>`
+
   const panel = makePanel(
-    'checkpoint-editor',
+    'checkpoint-editor notif-editor',
     `
     <button class="btn chip back-chip" data-action="back">${c.back}</button>
-    <h2 class="cms-title" style="font-size:34px;">🔔 ${c.editNotifications}</h2>
-    ${content.notifications
-      .map(
-        (n, i) => `
-      <p class="answer-label">${n.title} · ${n.time}</p>
-      <div class="field answer" contenteditable="true" data-notif="${i}">${n.text}<span class="pencil">✎</span></div>`
-      )
-      .join('')}
+    <h2 class="cms-title" style="font-size:30px;">🔔 ${c.editNotifications}</h2>
+    <div class="notif-entries"></div>
+    <button class="btn cms-add cms-wide" data-action="add-notif" style="margin-bottom:14px;"><span class="icon">+</span>${nc.add}</button>
     <button class="btn cms-add cms-wide" data-action="save"><span class="icon">💾</span>Speichern</button>
     `,
-    { back: onBack, save: onSave }
+    {
+      back: onBack,
+      save: () => onSave(panel.readEntries()),
+      'add-notif': () => {
+        panel.el
+          .querySelector('.notif-entries')
+          .insertAdjacentHTML(
+            'beforeend',
+            entry({ title: nc.newSender, time: nc.newTime, text: nc.newText })
+          )
+      },
+      'del-notif': (t) => t.closest('.notif-entry').remove(),
+    }
   )
+
+  panel.rebuild = () => {
+    panel.el.querySelector('.notif-entries').innerHTML = content.notifications
+      .map(entry)
+      .join('')
+  }
+  panel.readEntries = () =>
+    [...panel.el.querySelectorAll('.notif-entry')].map((e, i) => ({
+      title: e.querySelector('.ne-title').textContent.trim(),
+      time: e.querySelector('.ne-time').textContent.trim(),
+      text: e.querySelector('.ne-text').innerText.trim(),
+      delay: 10 + i * 10,
+    }))
+  panel.rebuild()
   return panel
 }
