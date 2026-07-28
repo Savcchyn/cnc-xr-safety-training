@@ -487,115 +487,50 @@ body {
   font-size: 22px;
 }
 
-/* ---------- AR App ---------- */
-.arapp-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: clamp(40px, 6vw, 120px);
-  align-items: center;
-  height: calc(100% - 150px);
-  max-width: 1560px;
-  padding-right: clamp(0px, 4vw, 80px);
+/* ---------- AR App: großes iPhone-Mockup mit Live-App ---------- */
+.arapp-open {
+  position: absolute;
+  top: 56px;
+  right: 64px;
 }
 
-.arapp-copy p {
-  font-size: clamp(16px, 1.5vw, 23px);
-  line-height: 1.55;
-  max-width: 640px;
+.phone-mock {
+  position: absolute;
+  top: 50%;
+  left: 62%;
+  transform: translateY(-50%);
+  height: min(88vh, 900px);
+  aspect-ratio: 1034 / 1952;
+  filter: drop-shadow(0 40px 90px rgba(0, 0, 0, 0.55));
 }
 
-.arapp-note {
-  color: var(--orange);
-  font-size: clamp(15px, 1.3vw, 19px) !important;
-}
-
-.phone {
-  height: min(68vh, calc(100vh - 250px));
-  aspect-ratio: 390 / 800;
-  border-radius: 54px;
-  border: 10px solid #e8e2d8;
-  background: #101010;
-  box-shadow: 0 34px 80px rgba(0, 0, 0, 0.5);
-  padding: 14px;
-}
-
-.phone-screen {
-  background: var(--charcoal);
-  border-radius: 40px;
+.phone-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
   height: 100%;
-  padding: 22px 18px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  overflow: hidden;
+  z-index: 2;
+  pointer-events: none;
 }
 
+/* Screen-Ausschnitt des Frames (transparent im PNG, per Pixel vermessen) */
 .phone-live {
-  padding: 0;
+  position: absolute;
+  left: 11.99%;
+  top: 6.4%;
+  width: 76.11%;
+  height: 87.35%;
+  z-index: 1;
+  border-radius: 7% / 3.6%;
+  overflow: hidden;
+  background: #2a2827;
 }
 
 .phone-live iframe {
   width: 100%;
   height: 100%;
   border: 0;
-  border-radius: 40px;
-}
-
-.arapp-link {
-  color: var(--orange);
-}
-
-.phone-chip {
-  align-self: flex-start;
-  background: var(--charcoal-soft);
-  border-radius: 10px;
-  font-size: 12px;
-  padding: 7px 14px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
-  margin-bottom: 14px;
-}
-
-.phone-img {
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: 22px;
-  overflow: hidden;
-  background: #1e1d1c;
-}
-
-.phone-img img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transform: scale(2.05);
-  transform-origin: 47% 60%;
-}
-
-.phone h3 {
-  font-size: 26px;
-  font-weight: 600;
-  margin: 22px 0 10px;
-}
-
-.phone-accent {
-  color: var(--orange);
-  font-size: 13px;
-  line-height: 1.5;
-  margin: 0 0 22px;
-}
-
-.phone-btn {
-  width: 100%;
-  background: transparent;
-  border: 1.5px solid rgba(255, 255, 255, 0.85);
-  border-radius: 14px;
-  color: #fff;
-  font-family: var(--font-head);
-  font-size: 16px;
-  padding: 15px 0;
-  cursor: pointer;
-  margin-top: auto;
+  display: block;
 }
 
 /* ---------- Workflow ---------- */

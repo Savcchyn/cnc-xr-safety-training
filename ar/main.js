@@ -39,6 +39,10 @@ function go(id, push = true) {
   if (push && current && current !== id) app.stack.push(current)
   if (current === 'viewer' && id !== 'viewer') exitViewer()
   show(id)
+  // zurück-Chip nur zeigen, wenn es ein Zurück gibt
+  $$('.screen.active > [data-back]').forEach(
+    (b) => (b.style.visibility = app.stack.length ? 'visible' : 'hidden')
+  )
   if (id === 'viewer') enterViewer()
   if (id === 'duell') startDuell()
   if (id === 'module') renderModuleList()
@@ -63,7 +67,7 @@ $$('[data-machine]').forEach((b) =>
 $$('[data-level]').forEach((b) =>
   b.addEventListener('click', () => {
     app.level = parseInt(b.dataset.level, 10)
-    go('home')
+    go('kamera')
   })
 )
 
@@ -375,7 +379,7 @@ function restartViewerMode() {
 
 function leaveViewer() {
   app.duell = null
-  app.stack = ['maschine', 'level']
+  app.stack = []
   go('home', false)
 }
 
@@ -531,7 +535,7 @@ function duellOutro(scenario) {
     `${won ? 'Stark — deine Routine hat gehalten.' : `${DUELL.botName} war heute schneller.`}\n` +
       `Und trotzdem: Ein übersprungener Schritt genügt.\nMögliche Folge: ${SCENARIO_NAMES[scenario]}.`,
     [
-      ['Nochmal spielen', () => { app.stack = ['maschine', 'level', 'home', 'quizmenu']; go('duell', false) }, true],
+      ['Nochmal spielen', () => { app.stack = ['home', 'quizmenu']; go('duell', false) }, true],
       ['Zum Menü', () => leaveViewer()],
     ]
   )
@@ -539,4 +543,6 @@ function duellOutro(scenario) {
 
 /* ---------------- Start ---------------- */
 
-show('maschine')
+// Einstieg ist das Hauptmenü; Maschinen- und Levelauswahl
+// liegen im Trainingssimulations-Pfad.
+go('home', false)
