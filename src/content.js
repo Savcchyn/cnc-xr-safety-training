@@ -112,7 +112,8 @@ export const content = {
     leaveModule: 'Modul verlassen',
     markDone: 'Modul als erledigt makeieren',
     timerLabel: 'Timer',
-    timerSeconds: 134, // 02:14 wie im Screenshot
+    // Timer zählt vorwärts ab 00:00 — er dokumentiert die Trainingszeit
+    // zur Einordnung, es läuft keine Zeit ab.
     checklistViews: 3,
     checklistViewSeconds: 15,
   },
@@ -153,19 +154,19 @@ export const content = {
       title: 'Schichtleiter',
       text: 'Teil 47 muss in 5 Minuten in die Endmontage.\nGeht das noch?',
       time: 'Vor 3 Min.',
-      delay: 18,
+      delay: 10,
     },
     {
       title: 'Kollege wartet',
       text: 'Ich brauch die Maschine für meinen Auftrag\nin 3 Minuten!',
       time: 'Vor 1 Min.',
-      delay: 42,
+      delay: 20,
     },
     {
       title: 'Feierabend',
       text: 'Du musst gleich los zum Konzert,\nsonst verpasst du die Bahn!',
       time: 'Gerade eben',
-      delay: 66,
+      delay: 30,
     },
   ],
 

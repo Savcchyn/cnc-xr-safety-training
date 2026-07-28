@@ -281,15 +281,24 @@ export class World {
     this.fires = []
   }
 
-  /** 'live' | 'space' → volle Größe, 'mini' → Miniaturmodell vor dem User. */
+  /**
+   * 'live' | 'space' → volle Größe, 'mini' → Miniaturmodell vor dem User.
+   * Hat der User die Miniatur selbst platziert/skaliert/gedreht
+   * (miniTransformed), bleibt ihre Transformation über Szenenwechsel erhalten.
+   */
   setMachineMode(mode) {
     this.machine.visible = true
     if (mode === 'mini') {
-      this.machine.scale.setScalar(0.24 * U)
-      this.machine.position.set(0, 0, 2.0 * U)
+      if (!this.miniTransformed) {
+        this.machine.scale.setScalar(0.24 * U)
+        this.machine.position.set(0, 0, 2.0 * U)
+        this.machine.rotation.y = 0
+      }
     } else {
+      this.miniTransformed = false
       this.machine.scale.setScalar(U)
       this.machine.position.set(0, 0, 0)
+      this.machine.rotation.y = 0
     }
   }
 

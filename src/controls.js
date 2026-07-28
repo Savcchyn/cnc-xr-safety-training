@@ -10,6 +10,8 @@ export class FPControls {
     this.camera = camera
     this.dom = domElement
     this.enabled = true
+    this.lookEnabled = true
+    this.wheelEnabled = true
 
     this.yaw = 0
     this.pitch = 0
@@ -30,7 +32,7 @@ export class FPControls {
   }
 
   onPointerDown(e) {
-    if (!this.enabled) return
+    if (!this.enabled || !this.lookEnabled) return
     // Nur auf dem Canvas (nicht auf UI-Panels) mit dem Umschauen beginnen
     if (e.target.closest('.panel') || e.target.closest('.gear-hotspot')) return
     this.dragging = true
@@ -63,7 +65,7 @@ export class FPControls {
   }
 
   onWheel(e) {
-    if (!this.enabled) return
+    if (!this.enabled || !this.wheelEnabled) return
     if (e.target.closest('.panel')) return
     e.preventDefault()
     this.tween = null

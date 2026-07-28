@@ -52,6 +52,7 @@ export function buildStartPanel(onSelect, onTutorial, onDashboard) {
   return makePanel(
     'start-panel',
     `
+    <div class="start-glow"></div>
     <div class="start-warning">⚠️</div>
     <div class="start-head">
       <h1>${c.titleTop}<br/><span class="accent">${c.titleAccent}</span> ${c.titleRest}</h1>
@@ -78,7 +79,7 @@ export function buildStartPanel(onSelect, onTutorial, onDashboard) {
 
 /* ---------------- Modul Selection ---------------- */
 
-export function buildModulePanel(onModule, { cms = false } = {}) {
+export function buildModulePanel(onModule, onBack) {
   const grid = content.modules
     .map(
       (m) => `
@@ -89,15 +90,17 @@ export function buildModulePanel(onModule, { cms = false } = {}) {
     )
     .join('')
 
-  if (cms) return grid
-
   return makePanel(
     'module-panel',
     `
+    <button class="btn chip back-chip-left" data-action="back">${content.cms.back}</button>
     <h2>${content.moduleSelect.title}</h2>
     <div class="module-grid">${grid}</div>
     `,
-    { module: (t) => onModule(parseInt(t.dataset.module, 10)) }
+    {
+      module: (t) => onModule(parseInt(t.dataset.module, 10)),
+      back: onBack,
+    }
   )
 }
 

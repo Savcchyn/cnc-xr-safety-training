@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { CSS3DSprite } from 'three/examples/jsm/renderers/CSS3DRenderer.js'
 import { content } from './content.js'
 import { GEAR_SVG } from './world.js'
+import { playNotifSound } from './audio.js'
 import {
   buildStartPanel,
   buildModulePanel,
@@ -62,8 +63,14 @@ export class Flow {
     this.raycaster = new THREE.Raycaster()
     this.pointer = new THREE.Vector2()
 
+    // Miniatur-Modell: greifen, positionieren, skalieren, drehen
+    this.mini = { grabbed: false, lift: 0.06 * U, keys: new Set() }
+    this.groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0)
+    this.hintMini = document.getElementById('hint-mini')
+
     this.buildPanels()
     this.setupPlacementEvents()
+    this.setupMiniInteraction()
     this.setState('start')
   }
 
@@ -80,7 +87,10 @@ export class Flow {
 
     this.panels.tutorial = buildTutorialPanel(() => this.showPanel('tutorial', false))
 
-    this.panels.modules = buildModulePanel(() => this.setState('preChecklist'))
+    this.panels.modules = buildModulePanel(
+      () => this.setState('preChecklist'),
+      () => this.setState('start')
+    )
 
     this.panels.preChecklist = buildPreChecklistPanel(
       () => this.setState('simulation'),
@@ -170,6 +180,7 @@ export class Flow {
     this.clearHotspots()
     this.world.clearFire()
     this.releaseGrab()
+    if (this.mini.grabbed) this.dropMini()
 
     const go = (pos, look, dur) => this.controls.goTo(V3(...pos), V3(...look), dur)
 
@@ -186,7 +197,11 @@ export class Flow {
         this.world.gearField.visible = false
         this.world.setMachineMode(this.mode)
         this.showPanel('modules', true, V3(0, 1.85, 1.7))
-        go([0, 1.65, 4.4], [0, 1.6, 0], 1.2)
+        if (this.mode === 'mini') {
+          go([0, 1.75, 4.7], [0, 0.75, 1.5], 1.2)
+        } else {
+          go([0, 1.65, 4.4], [0, 1.6, 0], 1.2)
+        }
         break
       }
 
@@ -280,34 +295,35 @@ export class Flow {
     const mini = this.mode === 'mini'
 
     if (mini) {
-      this.showPanel('checkin', true, V3(-1.45, 1.95, 2.5), 0.22)
-      this.showPanel('timer', true, V3(-2.95, 2.6, 2.2), 0.35)
-      this.showPanel('notifications', true, V3(-3.05, 1.65, 2.2), 0.35)
-      this.controls.goTo(V3(0.5, 1.75, 5.3), V3(-0.2, 1.0, 1.6), 1.2)
+      this.showPanel('checkin', true, V3(-1.35, 1.95, 2.55), 0.2)
+      this.showPanel('timer', true, V3(-2.85, 2.62, 2.35), 0.42)
+      this.showPanel('notifications', true, V3(-2.95, 1.62, 2.35), 0.42)
+      this.controls.goTo(V3(0.3, 1.75, 5.5), V3(-0.3, 0.95, 1.6), 1.2)
     } else {
-      this.showPanel('checkin', true, V3(-2.05, 1.85, 2.15), 0.28)
-      this.showPanel('timer', true, V3(-3.6, 2.55, 1.9), 0.4)
-      this.showPanel('notifications', true, V3(-3.7, 1.55, 1.9), 0.4)
-      this.controls.goTo(V3(-0.2, 1.75, 5.3), V3(-0.9, 1.25, 0.3), 1.2)
+      this.showPanel('checkin', true, V3(-1.55, 1.85, 2.1), 0.22)
+      this.showPanel('timer', true, V3(-3.0, 2.58, 2.0), 0.42)
+      this.showPanel('notifications', true, V3(-3.1, 1.58, 2.0), 0.42)
+      this.controls.goTo(V3(-0.5, 1.75, 5.6), V3(-1.1, 1.3, 0.2), 1.2)
     }
 
     this.spawnHotspots(true)
 
-    // Countdown
-    this.remaining = content.checkin.timerSeconds
-    this.panels.timer.setSeconds(this.remaining)
+    // Timer zählt vorwärts ab 00:00 — dokumentiert die Trainingszeit,
+    // es läuft keine Zeit ab.
+    this.elapsed = 0
+    this.panels.timer.setSeconds(0)
     this.setInterval(() => {
-      this.remaining -= 1
-      this.panels.timer.setSeconds(Math.max(0, this.remaining))
-      if (this.remaining <= 0) {
-        this.toast(content.timeUp)
-        this.evaluate()
-      }
+      this.elapsed += 1
+      this.panels.timer.setSeconds(this.elapsed)
     }, 1)
 
-    // Zeitdruck-Nachrichten
+    // Zeitdruck-Nachrichten: ab Sekunde 10 im 10-Sekunden-Abstand,
+    // jeweils mit UI-Sound
     content.notifications.forEach((n, i) => {
-      this.setTimer(() => this.panels.notifications.show(i), n.delay)
+      this.setTimer(() => {
+        this.panels.notifications.show(i)
+        playNotifSound()
+      }, n.delay)
     })
   }
 
@@ -478,6 +494,104 @@ export class Flow {
     this.setState('checkpointPlaced')
   }
 
+  /* ---------------- Miniatur-Modell: greifen & manipulieren ----------------
+   * Klicken = greifen/ablegen · Zeigerbewegung = auf dem Boden positionieren
+   * Scrollen = skalieren · Q/E = um die Hochachse (Z-Achse) drehen           */
+
+  setupMiniInteraction() {
+    let downPos = null
+
+    window.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('.panel') || e.target.closest('.gear-hotspot')) return
+      downPos = { x: e.clientX, y: e.clientY }
+    })
+
+    window.addEventListener('pointerup', (e) => {
+      if (!downPos) return
+      const moved = Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y)
+      downPos = null
+      if (moved > 6) return
+      this.onMiniClick(e)
+    })
+
+    window.addEventListener('pointermove', (e) => {
+      if (!this.mini.grabbed) return
+      this.setPointer(e)
+      this.raycaster.setFromCamera(this.pointer, this.camera)
+      const hit = new THREE.Vector3()
+      if (this.raycaster.ray.intersectPlane(this.groundPlane, hit)) {
+        const m = this.world.machine
+        m.position.x = THREE.MathUtils.clamp(hit.x, -6 * U, 6 * U)
+        m.position.z = THREE.MathUtils.clamp(hit.z, -1.5 * U, 6.5 * U)
+        m.position.y = this.mini.lift
+      }
+    })
+
+    window.addEventListener(
+      'wheel',
+      (e) => {
+        if (!this.mini.grabbed) return
+        e.preventDefault()
+        const m = this.world.machine
+        const factor = Math.exp(-e.deltaY * 0.0012)
+        const s = THREE.MathUtils.clamp(m.scale.x * factor, 0.06 * U, 0.7 * U)
+        m.scale.setScalar(s)
+      },
+      { passive: false }
+    )
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target.isContentEditable) return
+      const k = e.key.toLowerCase()
+      if (k === 'q' || k === 'e') this.mini.keys.add(k)
+    })
+    window.addEventListener('keyup', (e) => {
+      const k = e.key.toLowerCase()
+      this.mini.keys.delete(k)
+    })
+  }
+
+  setPointer(e) {
+    this.pointer.set(
+      (e.clientX / window.innerWidth) * 2 - 1,
+      -(e.clientY / window.innerHeight) * 2 + 1
+    )
+  }
+
+  onMiniClick(e) {
+    if (this.mode !== 'mini') return
+    if (this.state === 'cmsPlacement' || this.grabbed) return
+    if (!this.world.machine.visible) return
+
+    if (this.mini.grabbed) {
+      this.dropMini()
+      return
+    }
+
+    this.setPointer(e)
+    this.raycaster.setFromCamera(this.pointer, this.camera)
+    if (this.raycaster.intersectObject(this.world.machine, true).length) {
+      this.grabMini()
+    }
+  }
+
+  grabMini() {
+    this.mini.grabbed = true
+    this.world.miniTransformed = true
+    this.world.machine.position.y = this.mini.lift
+    this.controls.lookEnabled = false
+    this.controls.wheelEnabled = false
+    document.body.classList.add('mini-grabbed')
+  }
+
+  dropMini() {
+    this.mini.grabbed = false
+    this.world.machine.position.y = 0
+    this.controls.lookEnabled = true
+    this.controls.wheelEnabled = true
+    document.body.classList.remove('mini-grabbed')
+  }
+
   /* ---------------- Timer Helpers ---------------- */
 
   setTimer(fn, seconds) {
@@ -496,7 +610,23 @@ export class Flow {
     this.timers = []
   }
 
-  update() {
+  update(dt = 0.016) {
+    // Miniatur drehen (Q/E) während sie gegriffen ist
+    if (this.mini.grabbed && this.mini.keys.size) {
+      const dir = (this.mini.keys.has('q') ? 1 : 0) - (this.mini.keys.has('e') ? 1 : 0)
+      this.world.machine.rotation.y += dir * 1.8 * dt
+    }
+
+    // Hinweis-Balken für die Miniatur-Steuerung
+    if (this.hintMini) {
+      const show =
+        this.mode === 'mini' &&
+        this.world.machine.visible &&
+        this.state !== 'cmsPlacement' &&
+        this.state !== 'start'
+      this.hintMini.classList.toggle('visible', show)
+    }
+
     // Badges für Konsequenz-State setzen, sobald Hotspots existieren
     if (this.pendingBadges && this.hotspots.length) {
       for (const h of this.hotspots) {
