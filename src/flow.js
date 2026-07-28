@@ -322,7 +322,9 @@ export class Flow {
 
       case 'consequence': {
         // Konsequenz-Szenario zufällig wählen: Brand, Leckage oder Splitterflug
-        const scenario = ['fire', 'water', 'wood'][Math.floor(Math.random() * 3)]
+        const scenario =
+          this.forcedScenario || ['fire', 'water', 'wood'][Math.floor(Math.random() * 3)]
+        this.forcedScenario = null
         this.world.showConsequence(scenario)
         if (scenario === 'wood') {
           // Metallmaschinen (Fräse 2, Drehmaschine 3): durchdrehender
@@ -879,6 +881,45 @@ export class Flow {
     this.controls.lookEnabled = true
     this.controls.wheelEnabled = true
     document.body.classList.remove('mini-grabbed')
+  }
+
+  /**
+   * Deep-Links für Demo & Screenshots:
+   * /prototyp/?machine=0&level=1&space=1&state=simulation&notifs=1&task=1
+   * (Raw-setTimeout statt setTimer — Statewechsel dürfen sie nicht löschen.)
+   */
+  applyDeepLink(params) {
+    const machine = parseInt(params.get('machine') ?? '0', 10)
+    const level = parseInt(params.get('level') ?? '1', 10)
+    const space = parseInt(params.get('space') ?? '1', 10)
+    setTimeout(() => {
+      this.onStartSelect('machine', machine)
+      this.onStartSelect('level', level)
+      this.onStartSelect('space', space)
+    }, 400)
+
+    const target = params.get('state')
+    if (!target || target === 'modules') return
+    setTimeout(() => {
+      this.selectedModule = parseInt(params.get('module') ?? '2', 10)
+      if (params.get('scenario')) this.forcedScenario = params.get('scenario')
+      if (target === 'consequence' || target === 'reviewErrors') {
+        this.tasks = content.tasks.map((t, i) => ({
+          ...t,
+          answered: i < 2 ? t.correct : null,
+        }))
+        this.panels.consequence.setSkipped(3, 5)
+      }
+      this.setState(target)
+      if (target === 'simulation') {
+        if (params.get('notifs')) {
+          content.notifications.forEach((n, i) => this.panels.notifications.show(i))
+        }
+        if (params.get('task')) {
+          setTimeout(() => this.hotspots[1] && this.openTask(this.hotspots[1]), 1600)
+        }
+      }
+    }, 2600)
   }
 
   /* ---------------- Timer Helpers ---------------- */

@@ -3,25 +3,138 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CNC Fräsen Sicherheitstraining — XR Prototyp</title>
+    <title>Sicherheit, sichtbar machen — XR CNC Sicherheitstraining</title>
   </head>
   <body>
-    <div id="app"></div>
-    <div id="hud">
-      <div id="hint-mini">
-        <span><b>Klicken</b> Miniatur greifen / ablegen</span>
-        <span><b>Bewegen</b> positionieren</span>
-        <span><b>Scrollen</b> skalieren</span>
-        <span><b>Q E</b> drehen (Z-Achse)</span>
+    <main id="deck">
+      <!-- 01 · Startscreen -->
+      <section class="slide slide-blue" id="start">
+        <div class="start-center">
+          <h1 class="display">Sicherheit,<br />sichtbar machen.</h1>
+          <p class="start-sub">
+            Ein skalierbares XR-Framework für Produktionssicherheit:<br />
+            Die Konsequenz eines vergessenen Schritts wird real simuliert, ein
+            Zeitdruck-Modus deckt Betriebsblindheit auf, drei Spatial Modes passen sich
+            jedem Raum an und AR-Lernmaterial integrieren das Training in den Alltag.
+          </p>
+          <p class="start-sub start-sub-strong">
+            Die Sicherheits-Checkliste wird erlebbar in die aktive Wahrnehmung zurückgeholt.
+          </p>
+          <nav class="hub" aria-label="Kapitel"></nav>
+        </div>
+        <footer class="start-footer">Irena Arndt&nbsp;&nbsp;|&nbsp;&nbsp;Case Demo 29.07.2026</footer>
+      </section>
+
+      <!-- 02 · Der Auftrag -->
+      <section class="slide slide-blue" id="auftrag">
+        <h2 class="slide-title">Der Auftrag</h2>
+        <div class="brief">
+          <p>Ein modernes Training zum Thema "<b>Sicherheit</b> im Umgang mit einer CNC Fräse"</p>
+          <p>
+            Kunde legt Wert auf "ein besonderes Erlebnis für die Nutzenden", um für das Thema
+            <b>Aufmerksamkeit</b> zu schaffen.
+          </p>
+          <p>
+            Wir möchten ihm aber <b>kein "lineares" Training mit vorgegebenen Schritten</b>
+            vorschlagen, sondern eine <b>"Experience"</b>. Wie können wir das Training
+            <b>"special"</b> machen?
+          </p>
+        </div>
+      </section>
+
+      <!-- 03 · Das Produkt -->
+      <section class="slide slide-dark" id="produkt">
+        <h2 class="slide-title">Das Produkt</h2>
+        <div class="usp-chips" aria-label="USP Filter"></div>
+        <div class="produkt-layout">
+          <div class="feature-grid"></div>
+          <aside class="feature-detail">
+            <div class="detail-card">
+              <div class="detail-thumb"><img alt="" /></div>
+              <p class="detail-text">
+                Klicke einen Baustein, um Screenshot und Beschreibung aus dem Prototyp zu
+                sehen — oder filtere oben rechts nach den drei USPs.
+              </p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- 04 · Der Userflow -->
+      <section class="slide slide-dark" id="userflow">
+        <h2 class="slide-title">Der Userflow</h2>
+        <div class="flow-stage">
+          <button class="glass flow-arrow flow-prev" aria-label="Vorherige Station">‹</button>
+          <figure class="flow-figure">
+            <img alt="" />
+            <figcaption>
+              <h3 class="flow-step-title"></h3>
+              <p class="flow-step-text"></p>
+            </figcaption>
+          </figure>
+          <button class="glass flow-arrow flow-next" aria-label="Nächste Station">›</button>
+        </div>
+        <div class="flow-strip" aria-label="Alle Stationen"></div>
+      </section>
+
+      <!-- 05 · Web 3D Prototyp Demo -->
+      <section class="slide slide-dark" id="webdemo">
+        <h2 class="slide-title">Live Demo — Web 3D Prototyp</h2>
+        <a class="glass demo-open" href="/prototyp/" target="_blank" rel="noopener">
+          In neuem Tab öffnen ↗
+        </a>
+        <div class="demo-frame">
+          <div class="demo-placeholder">Demo lädt …</div>
+        </div>
+      </section>
+
+      <!-- 06 · AR App -->
+      <section class="slide slide-dark" id="arapp">
+        <h2 class="slide-title">Die AR App</h2>
+        <div class="arapp-layout">
+          <div class="arapp-copy">
+            <p>
+              Lernkarte oder Poster scannen — das Miniaturmodell der Maschine erscheint auf
+              dem Tisch, das Quiz testet die Routinen. Ohne Headset, direkt im Pausenraum.
+            </p>
+            <p class="arapp-note">Interaktive Demo folgt im nächsten Schritt.</p>
+          </div>
+          <div class="phone">
+            <div class="phone-screen">
+              <span class="phone-chip">zurück</span>
+              <div class="phone-img"><img src="/thumbs/mini.png" alt="Maschine 1 Miniaturmodell" /></div>
+              <h3>Maschine 1</h3>
+              <p class="phone-accent">Scanne die Lernkarte und teste<br />deine Routinen im Miniaturmodell</p>
+              <button class="phone-btn" type="button">Quiz starten</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 07 · Workflow -->
+      <section class="slide slide-dark" id="workflow">
+        <h2 class="slide-title">Mein Workflow</h2>
+        <div class="workflow-row"></div>
+        <div class="workflow-links">
+          <a class="glass shapes-link" href="#" target="_blank" rel="noopener">
+            ShapesXR Demo Space öffnen ↗
+          </a>
+          <span class="shapes-note"></span>
+        </div>
+        <footer class="start-footer">Irena Arndt&nbsp;&nbsp;|&nbsp;&nbsp;Case Demo 29.07.2026</footer>
+      </section>
+    </main>
+
+    <!-- Globale Navigation (Glassmorphism) -->
+    <nav id="deck-nav">
+      <button class="glass nav-home" aria-label="Zum Start">⌂</button>
+      <div class="nav-dots" role="tablist"></div>
+      <div class="nav-arrows">
+        <button class="glass nav-prev" aria-label="Zurück">‹</button>
+        <button class="glass nav-next" aria-label="Weiter">›</button>
       </div>
-      <div id="hint">
-        <span><b>Maus ziehen</b> umschauen</span>
-        <span><b>W A S D</b> bewegen</span>
-        <span><b>Scrollen</b> zoomen</span>
-        <span><b>Klicken</b> interagieren / greifen</span>
-      </div>
-      <div id="toast"></div>
-    </div>
-    <script type="module" src="/src/main.js"></script>
+    </nav>
+
+    <script type="module" src="/pres/main.js"></script>
   </body>
 </html>

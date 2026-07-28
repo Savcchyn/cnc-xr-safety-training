@@ -48,6 +48,11 @@ function toast(message) {
 
 const flow = new Flow({ scene, camera, controls, world, toast })
 
+// Deep-Links für Präsentations-Demos und Screenshot-Automation
+const params = new URLSearchParams(location.search)
+if (params.has('state') || params.has('machine')) flow.applyDeepLink(params)
+if (params.has('shot')) document.getElementById('hud').style.display = 'none'
+
 // Debug-Zugriff für die Entwicklung
 window.__world = world
 window.__flow = flow

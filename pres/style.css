@@ -1,0 +1,627 @@
+:root {
+  --blue: #2517f2;
+  --charcoal: #2e2c2b;
+  --charcoal-soft: #3a3836;
+  --orange: #f2762e;
+  --usp-yellow: #e9f70c;
+  --usp-magenta: #f012c4;
+  --usp-green: #52f012;
+  --font-head: 'Futura', 'Avenir Next', 'Century Gothic', 'Trebuchet MS', sans-serif;
+  --font-body: 'Inter', -apple-system, 'Segoe UI', 'Helvetica Neue', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-head);
+  background: var(--charcoal);
+  color: #fff;
+}
+
+/* ---------- Slides ---------- */
+#deck {
+  position: fixed;
+  inset: 0;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  padding: 56px 64px;
+  opacity: 0;
+  transform: translateY(26px);
+  pointer-events: none;
+  transition: opacity 0.45s ease, transform 0.45s ease;
+  overflow: hidden;
+}
+
+.slide.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.slide-blue {
+  background: var(--blue);
+}
+
+.slide-dark {
+  background: var(--charcoal);
+}
+
+.slide-title {
+  font-size: clamp(38px, 4.6vw, 64px);
+  font-weight: 600;
+  margin: 0 0 30px;
+  text-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* ---------- Glassmorphism ---------- */
+.glass {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.13);
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: #fff;
+  font-family: var(--font-head);
+  font-size: 16px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: background 0.15s, transform 0.12s;
+  user-select: none;
+}
+
+.glass:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.glass:active {
+  transform: scale(0.97);
+}
+
+/* ---------- Startscreen ---------- */
+#start {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.display {
+  font-size: clamp(56px, 8.6vw, 122px);
+  font-weight: 600;
+  line-height: 1.06;
+  margin: 0 0 52px;
+}
+
+.start-sub {
+  font-size: clamp(15px, 1.45vw, 21px);
+  line-height: 1.55;
+  margin: 0 auto 14px;
+  max-width: 1150px;
+}
+
+.start-sub-strong {
+  margin-top: 18px;
+}
+
+.hub {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 56px;
+}
+
+.start-footer {
+  position: absolute;
+  bottom: 34px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: clamp(14px, 1.3vw, 19px);
+}
+
+/* ---------- Der Auftrag ---------- */
+#auftrag .brief {
+  font-family: var(--font-body);
+  font-size: clamp(20px, 2.1vw, 31px);
+  line-height: 1.45;
+  max-width: 1500px;
+  margin-top: 10vh;
+}
+
+#auftrag .brief p {
+  margin: 0 0 1.35em;
+}
+
+/* ---------- Das Produkt ---------- */
+.usp-chips {
+  position: absolute;
+  top: 56px;
+  right: 64px;
+  display: flex;
+  gap: 16px;
+}
+
+.usp-chip {
+  background: var(--charcoal);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  color: var(--chip-color, #fff);
+  font-family: var(--font-head);
+  font-size: 17px;
+  padding: 12px 24px;
+  cursor: pointer;
+  box-shadow: 6px 6px 14px rgba(0, 0, 0, 0.35), -4px -4px 10px rgba(255, 255, 255, 0.05);
+  transition: border-color 0.15s;
+}
+
+.usp-chip.on {
+  border-color: var(--chip-color);
+}
+
+.produkt-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 58fr) minmax(0, 42fr);
+  gap: 44px;
+  height: calc(100% - 110px);
+}
+
+.feature-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+}
+
+.feature-row {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+}
+
+.feature-block {
+  flex: 1;
+  background: var(--charcoal);
+  border: 2px solid transparent;
+  border-radius: 18px;
+  color: #fff;
+  font-family: var(--font-head);
+  font-size: clamp(14px, 1.35vw, 21px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 10px 18px;
+  cursor: pointer;
+  box-shadow: 8px 8px 18px rgba(0, 0, 0, 0.38), -5px -5px 12px rgba(255, 255, 255, 0.045);
+  transition: border-color 0.15s, transform 0.12s;
+  line-height: 1.25;
+}
+
+.feature-block:hover {
+  transform: translateY(-2px);
+}
+
+.feature-block.split {
+  justify-content: space-between;
+  padding: 10px 34px;
+}
+
+.feature-block.filtered {
+  border-color: var(--block-color);
+}
+
+.feature-block.selected {
+  border-color: #fff;
+}
+
+.feature-detail {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.detail-card {
+  background: var(--charcoal);
+  border-radius: 20px;
+  box-shadow: 8px 8px 18px rgba(0, 0, 0, 0.38), -5px -5px 12px rgba(255, 255, 255, 0.045);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.detail-thumb {
+  border-radius: 14px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  aspect-ratio: 16 / 9;
+  background: #1e1d1c;
+  display: none;
+}
+
+.detail-thumb.has-img {
+  display: block;
+}
+
+.detail-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.detail-text {
+  font-size: clamp(15px, 1.35vw, 20px);
+  line-height: 1.5;
+  margin: 0;
+  min-height: 4.5em;
+}
+
+/* ---------- Userflow ---------- */
+.flow-stage {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  height: calc(100% - 275px);
+}
+
+.flow-arrow {
+  font-size: 30px;
+  width: 62px;
+  height: 62px;
+  padding: 0;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.flow-figure {
+  flex: 1;
+  display: flex;
+  gap: 34px;
+  align-items: center;
+  margin: 0;
+  min-width: 0;
+}
+
+.flow-figure img {
+  width: 58%;
+  border-radius: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.4);
+}
+
+.flow-step-title {
+  font-size: clamp(24px, 2.4vw, 38px);
+  margin: 0 0 14px;
+}
+
+.flow-step-text {
+  font-size: clamp(15px, 1.4vw, 21px);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.flow-strip {
+  position: absolute;
+  left: 64px;
+  right: 64px;
+  bottom: 100px;
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+}
+
+.flow-thumb {
+  flex: 0 0 150px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.15s, transform 0.12s;
+  background: none;
+  padding: 0;
+}
+
+.flow-thumb img {
+  width: 100%;
+  display: block;
+}
+
+.flow-thumb span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  font-family: var(--font-head);
+  font-size: 10.5px;
+  color: #fff;
+  background: rgba(20, 20, 20, 0.72);
+  padding: 4px 6px;
+  text-align: left;
+}
+
+.flow-thumb.active {
+  border-color: var(--orange);
+  transform: translateY(-3px);
+}
+
+/* ---------- Web Demo ---------- */
+.demo-open {
+  position: absolute;
+  top: 56px;
+  right: 64px;
+}
+
+.demo-frame {
+  position: absolute;
+  top: 140px;
+  left: 64px;
+  right: 64px;
+  bottom: 96px;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45);
+  background: #b9b8b6;
+}
+
+.demo-frame iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+.demo-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2e2c2b;
+  font-size: 22px;
+}
+
+/* ---------- AR App ---------- */
+.arapp-layout {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 60px;
+  align-items: center;
+  height: calc(100% - 120px);
+  max-width: 1500px;
+}
+
+.arapp-copy p {
+  font-size: clamp(17px, 1.6vw, 24px);
+  line-height: 1.55;
+  max-width: 620px;
+}
+
+.arapp-note {
+  color: var(--orange);
+  font-size: clamp(15px, 1.3vw, 19px) !important;
+}
+
+.phone {
+  height: min(74vh, 720px);
+  aspect-ratio: 390 / 800;
+  border-radius: 54px;
+  border: 10px solid #e8e2d8;
+  background: #101010;
+  box-shadow: 0 34px 80px rgba(0, 0, 0, 0.5);
+  padding: 14px;
+}
+
+.phone-screen {
+  background: var(--charcoal);
+  border-radius: 40px;
+  height: 100%;
+  padding: 22px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  overflow: hidden;
+}
+
+.phone-chip {
+  align-self: flex-start;
+  background: var(--charcoal-soft);
+  border-radius: 10px;
+  font-size: 12px;
+  padding: 7px 14px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  margin-bottom: 14px;
+}
+
+.phone-img {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 22px;
+  overflow: hidden;
+  background: #1e1d1c;
+}
+
+.phone-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(2.05);
+  transform-origin: 47% 60%;
+}
+
+.phone h3 {
+  font-size: 26px;
+  font-weight: 600;
+  margin: 22px 0 10px;
+}
+
+.phone-accent {
+  color: var(--orange);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0 0 22px;
+}
+
+.phone-btn {
+  width: 100%;
+  background: transparent;
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  border-radius: 14px;
+  color: #fff;
+  font-family: var(--font-head);
+  font-size: 16px;
+  padding: 15px 0;
+  cursor: pointer;
+  margin-top: auto;
+}
+
+/* ---------- Workflow ---------- */
+.workflow-row {
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+  margin-top: 7vh;
+}
+
+.wf-card {
+  flex: 1;
+  background: var(--charcoal);
+  border-radius: 18px;
+  box-shadow: 8px 8px 18px rgba(0, 0, 0, 0.38), -5px -5px 12px rgba(255, 255, 255, 0.045);
+  padding: 26px 24px;
+}
+
+.wf-card .wf-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--orange);
+  border-radius: 10px;
+  color: var(--orange);
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.wf-card h3 {
+  font-size: clamp(17px, 1.6vw, 24px);
+  margin: 0 0 10px;
+}
+
+.wf-card p {
+  font-size: clamp(13px, 1.15vw, 16.5px);
+  line-height: 1.5;
+  margin: 0;
+  opacity: 0.92;
+}
+
+.wf-sep {
+  align-self: center;
+  font-size: 26px;
+  color: var(--orange);
+  flex: 0 0 auto;
+}
+
+.workflow-links {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 6vh;
+}
+
+.shapes-note {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+/* ---------- Globale Navigation ---------- */
+#deck-nav {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+#deck-nav > * {
+  pointer-events: auto;
+}
+
+.nav-home {
+  position: absolute;
+  top: 26px;
+  left: 26px;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 22px;
+}
+
+.nav-arrows {
+  position: absolute;
+  right: 30px;
+  bottom: 26px;
+  display: flex;
+  gap: 12px;
+}
+
+.nav-arrows .glass {
+  width: 58px;
+  height: 58px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 26px;
+}
+
+.nav-dots {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+}
+
+.nav-dots button {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.nav-dots button.active {
+  background: #fff;
+  transform: scale(1.25);
+}
+
+#deck-nav.on-start .nav-home {
+  display: none;
+}

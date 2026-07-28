@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CNC Fräsen Sicherheitstraining — XR Prototyp</title>
+  </head>
+  <body>
+    <script>
+      // Screenshot-Modus: load-Event aufhalten, bis der Zielstate steht
+      const __p = new URLSearchParams(location.search)
+      if (__p.has('shot')) {
+        document.write(
+          '<img src="/hold?ms=' +
+            encodeURIComponent(__p.get('shot')) +
+            '" style="display:none" alt="" />'
+        )
+      }
+    </script>
+    <div id="app"></div>
+    <div id="hud">
+      <div id="hint-mini">
+        <span><b>Klicken</b> Miniatur greifen / ablegen</span>
+        <span><b>Bewegen</b> positionieren</span>
+        <span><b>Scrollen</b> skalieren</span>
+        <span><b>Q E</b> drehen (Z-Achse)</span>
+      </div>
+      <div id="hint">
+        <span><b>Maus ziehen</b> umschauen</span>
+        <span><b>W A S D</b> bewegen</span>
+        <span><b>Scrollen</b> zoomen</span>
+        <span><b>Klicken</b> interagieren / greifen</span>
+      </div>
+      <div id="toast"></div>
+    </div>
+    <script type="module" src="../src/main.js"></script>
+  </body>
+</html>
