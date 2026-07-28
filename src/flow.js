@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import { CSS3DSprite } from 'three/examples/jsm/renderers/CSS3DRenderer.js'
 import { content } from './content.js'
 import { GEAR_SVG } from './world.js'
-import { playNotifSound } from './audio.js'
+import { playNotifSound, playWoodCrack } from './audio.js'
 import {
   buildStartPanel,
   buildModulePanel,
@@ -34,6 +34,10 @@ const V3m = (x, y, z) => new THREE.Vector3(x, y, z)
 // Diese Panels billboarden im Modul: ihre Z-Achse (Front) folgt dem User,
 // sie bleiben dabei aufrecht (Rotation nur um die Hochachse)
 const BILLBOARD_PANELS = ['checkin', 'timer', 'notifications', 'miniChecklist']
+
+// Virtuelle Hand (Material "touch_app"), die nach einer Task-Entscheidung
+// die Aktion an der Maschine ausführt
+const HAND_SVG = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 11.24V7.5C9 6.12 10.12 5 11.5 5S14 6.12 14 7.5v3.74c1.21-.81 2-2.18 2-3.74C16 5.01 13.99 3 11.5 3S7 5.01 7 7.5c0 1.56.79 2.93 2 3.74zm9.84 4.63l-4.54-2.26c-.17-.07-.35-.11-.54-.11H13v-6c0-.83-.67-1.5-1.5-1.5S10 6.67 10 7.5v10.74l-3.43-.72c-.08-.01-.15-.03-.24-.03-.31 0-.59.13-.79.33l-.79.8 4.94 4.94c.27.27.65.44 1.06.44h6.79c.75 0 1.33-.55 1.44-1.28l.75-5.27c.01-.07.02-.14.02-.2 0-.62-.38-1.16-.91-1.38z"/></svg>`
 
 // Positionen der Interaktionspunkte (lokal zur Maschinen-Gruppe,
 // abgestimmt auf die geladenen GLB-Modelle)
@@ -69,6 +73,7 @@ export class Flow {
 
     // Miniatur-Modell: greifen, positionieren, skalieren, drehen
     this.mini = { grabbed: false, lift: 0.06 * U, keys: new Set() }
+    this.hands = []
     this.groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0)
     this.hintMini = document.getElementById('hint-mini')
 
@@ -182,9 +187,9 @@ export class Flow {
     this.hideAllPanels()
     this.clearTimers()
     this.clearHotspots()
-    this.world.clearFire()
     this.releaseGrab()
     if (this.mini.grabbed) this.dropMini()
+    this.world.clearConsequence()
 
     const go = (pos, look, dur) => this.controls.goTo(V3(...pos), V3(...look), dur)
 
@@ -229,7 +234,10 @@ export class Flow {
       }
 
       case 'consequence': {
-        this.world.igniteFire()
+        // Konsequenz-Szenario zufällig wählen: Brand, Leckage oder Splitterflug
+        const scenario = ['fire', 'water', 'wood'][Math.floor(Math.random() * 3)]
+        this.world.showConsequence(scenario)
+        if (scenario === 'wood') playWoodCrack()
         this.markHotspotResults()
         this.spawnHotspots(false)
         this.showPanel('consequence', true, V3(0.1, 1.85, 1.9))
@@ -298,17 +306,22 @@ export class Flow {
 
     const mini = this.mode === 'mini'
 
+    // Spatial Layout (Bogen um den User, von außen nach innen):
+    // Checkliste | Timer über Notifications | Check-In | Maschine
     if (mini) {
       this.showPanel('checkin', true, V3(-1.35, 1.95, 2.55), 0.2)
-      this.showPanel('timer', true, V3(-2.85, 2.62, 2.35), 0.42)
-      this.showPanel('notifications', true, V3(-2.95, 1.62, 2.35), 0.42)
-      this.controls.goTo(V3(0.3, 1.75, 5.5), V3(-0.3, 0.95, 1.6), 1.2)
+      this.showPanel('timer', true, V3(-2.8, 2.62, 2.75), 0.42)
+      this.showPanel('notifications', true, V3(-2.85, 1.62, 2.75), 0.42)
+      this.simPose = { pos: V3(0.3, 1.75, 5.5), look: V3(-0.3, 0.95, 1.6) }
+      this.checklistLook = V3(-2.5, 1.5, 1.7)
     } else {
-      this.showPanel('checkin', true, V3(-1.55, 1.85, 2.1), 0.22)
-      this.showPanel('timer', true, V3(-3.0, 2.58, 2.0), 0.42)
-      this.showPanel('notifications', true, V3(-3.1, 1.58, 2.0), 0.42)
-      this.controls.goTo(V3(-0.5, 1.75, 5.6), V3(-1.1, 1.3, 0.2), 1.2)
+      this.showPanel('checkin', true, V3(-1.5, 1.85, 2.05), 0.22)
+      this.showPanel('timer', true, V3(-2.95, 2.62, 2.15), 0.42)
+      this.showPanel('notifications', true, V3(-3.0, 1.6, 2.15), 0.42)
+      this.simPose = { pos: V3(-0.5, 1.75, 5.6), look: V3(-1.1, 1.3, 0.2) }
+      this.checklistLook = V3(-2.9, 1.55, 1.0)
     }
+    this.controls.goTo(this.simPose.pos, this.simPose.look, 1.2)
 
     this.spawnHotspots(true)
 
@@ -353,6 +366,8 @@ export class Flow {
   clearHotspots() {
     for (const h of this.hotspots) h.removeFromParent()
     this.hotspots = []
+    for (const h of this.hands) h.removeFromParent()
+    this.hands = []
     this.showPanel('task', false)
     this.activeTask = null
   }
@@ -375,11 +390,33 @@ export class Flow {
   onTaskAnswer(option) {
     if (!this.activeTask) return
     this.activeTask.answered = option
+    const sprite = this.hotspots.find((h) => h.userData.task === this.activeTask)
     this.setTimer(() => {
       this.showPanel('task', false)
       for (const h of this.hotspots) h.element.classList.remove('active')
+      // Task-Bubble färbt sich ein + virtuelle Hand führt die Aktion aus
+      if (sprite) {
+        sprite.element.classList.add('answered')
+        this.playHandSimulation(sprite)
+      }
       this.activeTask = null
-    }, 0.45)
+    }, 0.35)
+  }
+
+  /** Virtuelle Hand erscheint am Interaktionspunkt und drückt die Eingabe. */
+  playHandSimulation(sprite) {
+    const el = document.createElement('div')
+    el.className = 'hand-sim'
+    el.innerHTML = `<div class="hand-inner">${HAND_SVG}</div>`
+    const hand = new CSS3DSprite(el)
+    hand.scale.setScalar(0.0032)
+    hand.position.copy(sprite.position).add(new THREE.Vector3(0.16, -0.24, 0.14))
+    this.world.machine.add(hand)
+    this.hands.push(hand)
+    this.setTimer(() => {
+      hand.removeFromParent()
+      this.hands = this.hands.filter((h) => h !== hand)
+    }, 1.7)
   }
 
   showMiniChecklist() {
@@ -387,8 +424,11 @@ export class Flow {
     this.checklistViews -= 1
     this.panels.checkin.setViewsLeft(this.checklistViews)
 
-    const pos = this.mode === 'mini' ? V3(-1.9, 1.7, 2.7) : V3(-3.35, 1.8, 2.25)
+    // Ganz außen links im Bogen — überlappt weder Timer noch Notifications.
+    // Der Blick schwenkt zum Cluster und nach dem Ausblenden wieder zurück.
+    const pos = this.mode === 'mini' ? V3(-4.15, 1.9, 2.95) : V3(-4.35, 1.85, 2.35)
     this.showPanel('miniChecklist', true, pos, 0.42)
+    this.controls.goTo(this.controls.position.clone(), this.checklistLook, 0.8)
 
     let left = content.checkin.checklistViewSeconds
     this.panels.miniChecklist.setCountdown(left)
@@ -398,6 +438,9 @@ export class Flow {
       if (left <= 0) {
         clearInterval(id)
         this.showPanel('miniChecklist', false)
+        if (this.state === 'simulation') {
+          this.controls.goTo(this.controls.position.clone(), this.simPose.look, 0.8)
+        }
       }
     }, 1000)
     this.timers.push(id)

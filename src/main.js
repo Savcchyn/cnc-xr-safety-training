@@ -66,7 +66,7 @@ function animate() {
   requestAnimationFrame(animate)
   const dt = Math.min(clock.getDelta(), 0.05)
   controls.update(dt)
-  world.update(clock.elapsedTime)
+  world.update(clock.elapsedTime, dt)
   flow.update(dt)
   renderer.render(scene, camera)
   cssRenderer.render(scene, camera)

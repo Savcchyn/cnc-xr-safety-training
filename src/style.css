@@ -1050,6 +1050,58 @@ body.mini-grabbed #hint-mini {
   background: radial-gradient(circle at 35% 30%, #9ed0b3, #74b591 70%);
 }
 
+/* Beantwortete Tasks bleiben dauerhaft eingefärbt */
+.gear-hotspot.answered {
+  background: radial-gradient(circle at 35% 30%, #9ed0b3, #74b591 70%);
+}
+
+/* ---------- Virtuelle Hand (Task-Simulation) ---------- */
+.hand-sim {
+  width: 170px;
+  height: 170px;
+  pointer-events: none;
+}
+
+.hand-inner {
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  animation: handpress 1.6s ease forwards;
+  transform-origin: 55% 85%;
+}
+
+.hand-inner svg {
+  width: 100%;
+  height: 100%;
+  fill: #9fd3b6;
+  opacity: 0.95;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+}
+
+@keyframes handpress {
+  0% {
+    opacity: 0;
+    transform: translate(90px, 70px) rotate(10deg) scale(0.9);
+  }
+  30% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+  48% {
+    transform: translate(-12px, -18px) scale(0.9);
+  }
+  62% {
+    transform: translate(0, 0) scale(1);
+  }
+  84% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(40px, 36px) scale(0.94);
+  }
+}
+
 .gear-hotspot.grabbed {
   pointer-events: none;
   box-shadow: 0 0 0 6px rgba(242, 118, 46, 0.4), 0 10px 26px rgba(0, 0, 0, 0.35);

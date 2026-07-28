@@ -43,6 +43,7 @@ export class World {
     this.scene = scene
     this.floatGears = []
     this.fires = []
+    this.splinters = []
 
     this.setupLights()
     this.setupGround()
@@ -254,6 +255,102 @@ export class World {
     return group
   }
 
+  /**
+   * Konsequenz-Szenarien: 'fire' (Brand), 'water' (Leckage/Pfütze),
+   * 'wood' (Werkstück birst, Splitterflug). Wird zufällig gewählt.
+   */
+  showConsequence(type) {
+    this.clearConsequence()
+    if (type === 'water') this.spawnWater()
+    else if (type === 'wood') this.spawnSplinters()
+    else this.igniteFire()
+  }
+
+  clearConsequence() {
+    this.clearFire()
+    if (this.waterGroup) {
+      this.waterGroup.removeFromParent()
+      this.waterGroup = null
+    }
+    if (this.splinterGroup) {
+      this.splinterGroup.removeFromParent()
+      this.splinterGroup = null
+    }
+    this.splinters = []
+  }
+
+  /** Große Wasserpfütze unter und neben der Fräse (Leckage-Szenario). */
+  spawnWater() {
+    const group = new THREE.Group()
+    const waterMat = new THREE.MeshStandardMaterial({
+      color: 0x4d84a8,
+      transparent: true,
+      opacity: 0.72,
+      roughness: 0.08,
+      metalness: 0.35,
+    })
+    const sheen = new THREE.MeshStandardMaterial({
+      color: 0x9cc8e0,
+      transparent: true,
+      opacity: 0.25,
+      roughness: 0.05,
+    })
+
+    // Unregelmäßige Pfütze aus überlappenden Ellipsen
+    const blobs = [
+      [0.5, 0.3, 2.4, 1.6, 0],
+      [-1.4, 1.1, 1.5, 1.1, 0.4],
+      [1.9, 1.0, 1.2, 0.9, -0.3],
+      [-0.4, -1.1, 1.3, 0.9, 0.2],
+    ]
+    for (const [x, z, rx, rz, rot] of blobs) {
+      const m = new THREE.Mesh(new THREE.CircleGeometry(1, 40), waterMat)
+      m.rotation.x = -Math.PI / 2
+      m.rotation.z = rot
+      m.scale.set(rx, rz, 1)
+      m.position.set(x, 0.012, z)
+      group.add(m)
+      const glanz = new THREE.Mesh(new THREE.CircleGeometry(0.55, 32), sheen)
+      glanz.rotation.x = -Math.PI / 2
+      glanz.scale.set(rx * 0.5, rz * 0.4, 1)
+      glanz.position.set(x - rx * 0.15, 0.016, z - rz * 0.15)
+      group.add(glanz)
+    }
+
+    this.machine.add(group)
+    this.waterGroup = group
+  }
+
+  /** Werkstück birst: Holzsplitter fliegen von der Tischfläche. */
+  spawnSplinters() {
+    const group = new THREE.Group()
+    const mats = [MAT.wood, MAT.woodLight, new THREE.MeshStandardMaterial({ color: 0x8a6a42, roughness: 0.85 })]
+    const rng = (a, b) => a + Math.random() * (b - a)
+
+    this.splinters = []
+    const count = 30
+    for (let i = 0; i < count; i++) {
+      const big = i < 5 // ein paar größere Bruchstücke
+      const geo = big
+        ? new THREE.BoxGeometry(rng(0.22, 0.36), 0.03, rng(0.08, 0.16))
+        : new THREE.BoxGeometry(rng(0.04, 0.15), 0.014, rng(0.015, 0.05))
+      const mesh = new THREE.Mesh(geo, mats[i % mats.length])
+      mesh.castShadow = true
+      mesh.position.set(rng(0.1, 1.1), rng(1.12, 1.25), rng(-0.35, 0.35))
+      mesh.rotation.set(rng(0, 3), rng(0, 3), rng(0, 3))
+      group.add(mesh)
+      this.splinters.push({
+        mesh,
+        vel: new THREE.Vector3(rng(-2.0, 2.0), rng(1.6, 3.8), rng(-2.0, 2.2)),
+        angVel: new THREE.Vector3(rng(-9, 9), rng(-9, 9), rng(-9, 9)),
+        resting: false,
+      })
+    }
+
+    this.machine.add(group)
+    this.splinterGroup = group
+  }
+
   /** Feuer-Sprites auf der Maschine (Konsequenz-Simulation). */
   igniteFire() {
     this.clearFire()
@@ -302,11 +399,32 @@ export class World {
     }
   }
 
-  update(t) {
+  update(t, dt = 0.016) {
     for (const g of this.floatGears) {
       const { base, phase, speed } = g.userData
       g.position.y = base.y + Math.sin(t * speed + phase) * 0.14
       g.position.x = base.x + Math.cos(t * speed * 0.6 + phase) * 0.08
+    }
+
+    // Splitter-Physik (lokale Meter innerhalb der Maschinen-Gruppe)
+    if (this.splinters.length) {
+      for (const s of this.splinters) {
+        if (s.resting) continue
+        s.vel.y -= 9.8 * dt
+        s.mesh.position.addScaledVector(s.vel, dt)
+        s.mesh.rotation.x += s.angVel.x * dt
+        s.mesh.rotation.y += s.angVel.y * dt
+        s.mesh.rotation.z += s.angVel.z * dt
+
+        // Boden: Tischfläche (innerhalb des Tisch-Footprints) oder Hallenboden
+        const p = s.mesh.position
+        const onTable = p.x > -0.7 && p.x < 1.9 && p.z > -0.85 && p.z < 0.85
+        const floor = onTable && s.vel.y < 0 && p.y > 0.9 ? 1.09 : 0.025
+        if (p.y <= floor) {
+          p.y = floor
+          s.resting = true
+        }
+      }
     }
   }
 }
