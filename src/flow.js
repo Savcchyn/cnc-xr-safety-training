@@ -31,6 +31,10 @@ const V3 = (x, y, z) => new THREE.Vector3(x * U, y * U, z * U)
 // Maschinen-lokale Koordinaten (Meter — die Maschinen-Gruppe skaliert selbst mit U)
 const V3m = (x, y, z) => new THREE.Vector3(x, y, z)
 
+// Diese Panels billboarden im Modul: ihre Z-Achse (Front) folgt dem User,
+// sie bleiben dabei aufrecht (Rotation nur um die Hochachse)
+const BILLBOARD_PANELS = ['checkin', 'timer', 'notifications', 'miniChecklist']
+
 // Positionen der Interaktionspunkte (lokal zur Maschinen-Gruppe,
 // abgestimmt auf die geladenen GLB-Modelle)
 const HOTSPOT_POSITIONS = {
@@ -611,6 +615,20 @@ export class Flow {
   }
 
   update(dt = 0.016) {
+    // Billboarding: UI-Panels im Modul weich zum User ausrichten
+    const k = Math.min(1, 8 * dt)
+    for (const name of BILLBOARD_PANELS) {
+      const panel = this.panels[name]
+      if (!panel || !panel.object.parent) continue
+      const o = panel.object
+      const dx = this.camera.position.x - o.position.x
+      const dz = this.camera.position.z - o.position.z
+      const target = Math.atan2(dx, dz)
+      let delta = target - o.rotation.y
+      delta = ((((delta + Math.PI) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2)) - Math.PI
+      o.rotation.y += delta * k
+    }
+
     // Miniatur drehen (Q/E) während sie gegriffen ist
     if (this.mini.grabbed && this.mini.keys.size) {
       const dir = (this.mini.keys.has('q') ? 1 : 0) - (this.mini.keys.has('e') ? 1 : 0)

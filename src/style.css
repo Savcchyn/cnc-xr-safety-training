@@ -311,12 +311,13 @@ body.mini-grabbed #hint-mini {
 
 .back-chip-left {
   position: absolute;
-  top: 26px;
+  top: 30px;
   left: 34px;
 }
 
+/* Platz für den zurück-Chip: eigene Zeile mit Abstand zur Headline */
 .module-panel h2 {
-  padding-top: 14px;
+  padding-top: 64px;
 }
 
 .module-panel h2 {
