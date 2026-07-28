@@ -139,14 +139,42 @@ body {
 /* ---------- Der Auftrag ---------- */
 #auftrag .brief {
   font-family: var(--font-body);
-  font-size: clamp(20px, 2.1vw, 31px);
-  line-height: 1.45;
-  max-width: 1500px;
-  margin-top: 10vh;
+  font-size: clamp(17px, 1.6vw, 25px);
+  line-height: 1.5;
+  max-width: 1450px;
+  margin-top: 4vh;
 }
 
 #auftrag .brief p {
-  margin: 0 0 1.35em;
+  margin: 0 0 1.3em;
+}
+
+.deutung {
+  border-left: 4px solid rgba(255, 255, 255, 0.55);
+  padding: 6px 0 6px 28px;
+  margin: 2.8em 0;
+}
+
+.deutung-label {
+  display: inline-block;
+  font-family: var(--font-head);
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  margin-bottom: 10px;
+}
+
+.deutung p {
+  margin: 0 !important;
+}
+
+.big-statement {
+  font-family: var(--font-head);
+  font-size: clamp(30px, 3.6vw, 54px);
+  font-weight: 600;
+  line-height: 1.2;
+  margin-top: 1.4em !important;
 }
 
 /* ---------- Das Produkt ---------- */
@@ -274,110 +302,167 @@ body {
   min-height: 4.5em;
 }
 
-/* ---------- Userflow ---------- */
-.flow-stage {
-  display: flex;
-  align-items: center;
-  gap: 26px;
-  height: calc(100% - 275px);
-}
-
-.flow-arrow {
-  font-size: 30px;
-  width: 62px;
-  height: 62px;
-  padding: 0;
-  border-radius: 50%;
-  flex: 0 0 auto;
-}
-
-.flow-figure {
-  flex: 1;
-  display: flex;
-  gap: 34px;
-  align-items: center;
-  margin: 0;
-  min-width: 0;
-}
-
-.flow-figure img {
-  width: 58%;
-  border-radius: 18px;
-  border: 2px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.4);
-}
-
-.flow-step-title {
-  font-size: clamp(24px, 2.4vw, 38px);
-  margin: 0 0 14px;
-}
-
-.flow-step-text {
-  font-size: clamp(15px, 1.4vw, 21px);
+/* ---------- Userflow: Gesamtdiagramm + Close-up ---------- */
+.flow-intro {
+  font-size: clamp(13px, 1.15vw, 17px);
   line-height: 1.5;
-  margin: 0;
+  max-width: 1080px;
+  margin: -14px 0 26px;
+  opacity: 0.92;
 }
 
-.flow-strip {
-  position: absolute;
-  left: 64px;
-  right: 64px;
-  bottom: 100px;
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-  scrollbar-width: thin;
+.userflow-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 60fr) minmax(0, 40fr);
+  gap: 44px;
+  height: calc(100% - 175px);
+  align-items: start;
 }
 
-.flow-thumb {
-  flex: 0 0 150px;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.25);
-  cursor: pointer;
+.flow-map {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(3, auto);
+  gap: 34px 30px;
+  align-content: start;
+}
+
+.flow-node {
   position: relative;
-  transition: border-color 0.15s, transform 0.12s;
-  background: none;
-  padding: 0;
+  background: #fff;
+  border: 2px solid #fff;
+  border-radius: 12px;
+  padding: 3px 3px 0;
+  cursor: pointer;
+  transition: transform 0.12s, border-color 0.15s, box-shadow 0.15s;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
 }
 
-.flow-thumb img {
+.flow-node img {
   width: 100%;
+  border-radius: 8px;
   display: block;
 }
 
-.flow-thumb span {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
+.flow-node span {
+  display: block;
   font-family: var(--font-head);
-  font-size: 10.5px;
-  color: #fff;
-  background: rgba(20, 20, 20, 0.72);
-  padding: 4px 6px;
-  text-align: left;
+  font-size: clamp(8px, 0.62vw, 11px);
+  color: #2e2c2b;
+  padding: 3px 2px 4px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.flow-thumb.active {
-  border-color: var(--orange);
+.flow-node.has-arrow::after {
+  content: '→';
+  position: absolute;
+  right: -25px;
+  top: 40%;
+  color: #fff;
+  font-size: 17px;
+}
+
+.flow-node.branch::before {
+  content: '↑';
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 16px;
+}
+
+.flow-node:hover {
   transform: translateY(-3px);
 }
 
+.flow-node.active {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 3px rgba(242, 118, 46, 0.45), 0 12px 28px rgba(0, 0, 0, 0.4);
+}
+
+.flow-close {
+  background: var(--charcoal);
+  border-radius: 20px;
+  box-shadow: 8px 8px 18px rgba(0, 0, 0, 0.38), -5px -5px 12px rgba(255, 255, 255, 0.045);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.flow-close-img {
+  border-radius: 14px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  aspect-ratio: 16 / 9;
+  background: #1e1d1c;
+}
+
+.flow-close-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.flow-step-title {
+  font-size: clamp(19px, 1.8vw, 28px);
+  margin: 0;
+}
+
+.flow-step-text {
+  font-size: clamp(13px, 1.2vw, 17px);
+  line-height: 1.5;
+  margin: 0;
+  min-height: 4.5em;
+}
+
+.flow-nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.flow-nav .glass {
+  width: 50px;
+  height: 50px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 22px;
+}
+
+.flow-count {
+  font-size: 15px;
+  opacity: 0.8;
+}
+
 /* ---------- Web Demo ---------- */
-.demo-open {
+.demo-intro {
+  font-size: clamp(13px, 1.15vw, 17px);
+  line-height: 1.5;
+  max-width: 900px;
+  margin: -14px 0 0;
+  opacity: 0.92;
+}
+
+.demo-actions {
   position: absolute;
   top: 56px;
   right: 64px;
+  display: flex;
+  gap: 12px;
 }
 
 .demo-frame {
   position: absolute;
-  top: 140px;
+  top: 185px;
   left: 64px;
   right: 64px;
-  bottom: 96px;
+  bottom: 90px;
   border-radius: 22px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -405,17 +490,18 @@ body {
 /* ---------- AR App ---------- */
 .arapp-layout {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 60px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: clamp(40px, 6vw, 120px);
   align-items: center;
-  height: calc(100% - 120px);
-  max-width: 1500px;
+  height: calc(100% - 150px);
+  max-width: 1560px;
+  padding-right: clamp(0px, 4vw, 80px);
 }
 
 .arapp-copy p {
-  font-size: clamp(17px, 1.6vw, 24px);
+  font-size: clamp(16px, 1.5vw, 23px);
   line-height: 1.55;
-  max-width: 620px;
+  max-width: 640px;
 }
 
 .arapp-note {
@@ -424,7 +510,7 @@ body {
 }
 
 .phone {
-  height: min(74vh, 720px);
+  height: min(68vh, calc(100vh - 250px));
   aspect-ratio: 390 / 800;
   border-radius: 54px;
   border: 10px solid #e8e2d8;
@@ -498,50 +584,59 @@ body {
 }
 
 /* ---------- Workflow ---------- */
+.workflow-intro {
+  font-size: clamp(13px, 1.15vw, 17px);
+  line-height: 1.5;
+  max-width: 1000px;
+  margin: -14px 0 0;
+  opacity: 0.92;
+}
+
 .workflow-row {
   display: flex;
   align-items: stretch;
-  gap: 14px;
-  margin-top: 7vh;
+  gap: 10px;
+  margin-top: 5vh;
 }
 
 .wf-card {
   flex: 1;
+  min-width: 0;
   background: var(--charcoal);
-  border-radius: 18px;
+  border-radius: 16px;
   box-shadow: 8px 8px 18px rgba(0, 0, 0, 0.38), -5px -5px 12px rgba(255, 255, 255, 0.045);
-  padding: 26px 24px;
+  padding: 20px 16px;
 }
 
 .wf-card .wf-num {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 38px;
+  height: 38px;
   border: 2px solid var(--orange);
-  border-radius: 10px;
+  border-radius: 9px;
   color: var(--orange);
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .wf-card h3 {
-  font-size: clamp(17px, 1.6vw, 24px);
-  margin: 0 0 10px;
+  font-size: clamp(14px, 1.25vw, 19px);
+  margin: 0 0 8px;
 }
 
 .wf-card p {
-  font-size: clamp(13px, 1.15vw, 16.5px);
-  line-height: 1.5;
+  font-size: clamp(11px, 0.95vw, 13.5px);
+  line-height: 1.45;
   margin: 0;
   opacity: 0.92;
 }
 
 .wf-sep {
   align-self: center;
-  font-size: 26px;
+  font-size: 20px;
   color: var(--orange);
   flex: 0 0 auto;
 }
@@ -579,6 +674,24 @@ body {
   padding: 0;
   border-radius: 50%;
   font-size: 22px;
+}
+
+.nav-fs {
+  position: absolute;
+  top: 26px;
+  right: 26px;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 20px;
+}
+
+/* Auf Produkt/Demo-Slides sitzt oben rechts bereits UI — Button weicht aus */
+#deck-nav.fs-low .nav-fs {
+  top: auto;
+  bottom: 96px;
+  right: 30px;
 }
 
 .nav-arrows {
