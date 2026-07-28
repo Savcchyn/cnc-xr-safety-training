@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { U } from './units.js'
 
 /**
  * First-Person-Steuerung: Maus ziehen = umschauen, WASD = bewegen,
@@ -69,14 +70,14 @@ export class FPControls {
     const dir = new THREE.Vector3(0, 0, -1).applyEuler(
       new THREE.Euler(this.pitch, this.yaw, 0, 'YXZ')
     )
-    this.position.addScaledVector(dir, -e.deltaY * 0.0035)
+    this.position.addScaledVector(dir, -e.deltaY * 0.0035 * U)
     this.clampPosition()
   }
 
   clampPosition() {
-    this.position.x = THREE.MathUtils.clamp(this.position.x, -8, 8)
-    this.position.z = THREE.MathUtils.clamp(this.position.z, -3, 8)
-    this.position.y = THREE.MathUtils.clamp(this.position.y, 0.6, 3.2)
+    this.position.x = THREE.MathUtils.clamp(this.position.x, -8 * U, 8 * U)
+    this.position.z = THREE.MathUtils.clamp(this.position.z, -3 * U, 8 * U)
+    this.position.y = THREE.MathUtils.clamp(this.position.y, 0.6 * U, 3.2 * U)
   }
 
   /** Sanfte Fahrt zu einer Pose: { pos: Vector3, look: Vector3 } */
@@ -115,7 +116,7 @@ export class FPControls {
     }
 
     if (this.keys.size) {
-      const speed = 2.4 * dt
+      const speed = 2.4 * U * dt
       const forward = new THREE.Vector3(-Math.sin(this.yaw), 0, -Math.cos(this.yaw))
       const right = new THREE.Vector3(Math.cos(this.yaw), 0, -Math.sin(this.yaw))
       if (this.keys.has('w')) this.position.addScaledVector(forward, speed)

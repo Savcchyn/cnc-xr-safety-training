@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { CSS3DSprite } from 'three/examples/jsm/renderers/CSS3DRenderer.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { U } from './units.js'
 
 export const GEAR_SVG = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>`
 
@@ -56,6 +57,7 @@ export class World {
     this.loadMachineModel()
 
     this.gearField = this.buildGearField()
+    this.gearField.scale.setScalar(U)
     scene.add(this.gearField)
   }
 
@@ -64,13 +66,15 @@ export class World {
     this.scene.add(hemi)
 
     const dir = new THREE.DirectionalLight(0xffffff, 1.6)
-    dir.position.set(4, 8, 5)
+    dir.position.set(4 * U, 8 * U, 5 * U)
     dir.castShadow = true
     dir.shadow.mapSize.set(2048, 2048)
-    dir.shadow.camera.left = -8
-    dir.shadow.camera.right = 8
-    dir.shadow.camera.top = 8
-    dir.shadow.camera.bottom = -8
+    dir.shadow.camera.left = -8 * U
+    dir.shadow.camera.right = 8 * U
+    dir.shadow.camera.top = 8 * U
+    dir.shadow.camera.bottom = -8 * U
+    dir.shadow.camera.near = 0.5 * U
+    dir.shadow.camera.far = 30 * U
     this.scene.add(dir)
   }
 
@@ -84,6 +88,7 @@ export class World {
     })
     const ground = new THREE.Mesh(geo, mat)
     ground.rotation.x = -Math.PI / 2
+    ground.scale.setScalar(U)
     ground.receiveShadow = true
     this.scene.add(ground)
   }
@@ -238,7 +243,7 @@ export class World {
       el.style.height = `${size}px`
       el.innerHTML = GEAR_SVG
       const sprite = new CSS3DSprite(el)
-      sprite.scale.setScalar(0.0022)
+      sprite.scale.setScalar(1 / U)
       sprite.position.set(rng(-4.2, 4.2), rng(0.4, 3.4), rng(-1.5, 1.2))
       sprite.userData.base = sprite.position.clone()
       sprite.userData.phase = rng(0, Math.PI * 2)
@@ -280,10 +285,10 @@ export class World {
   setMachineMode(mode) {
     this.machine.visible = true
     if (mode === 'mini') {
-      this.machine.scale.setScalar(0.24)
-      this.machine.position.set(0, 0, 2.0)
+      this.machine.scale.setScalar(0.24 * U)
+      this.machine.position.set(0, 0, 2.0 * U)
     } else {
-      this.machine.scale.setScalar(1)
+      this.machine.scale.setScalar(U)
       this.machine.position.set(0, 0, 0)
     }
   }

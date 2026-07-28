@@ -1,7 +1,9 @@
 import { CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer.js'
 import { content } from './content.js'
 
-const PANEL_SCALE = 0.0022
+// Weltmaßstab ist 455 Einheiten/Meter → Panels behalten Matrix-Scale 1
+// (wichtig für korrekte border-radius/box-shadow-Darstellung in Firefox).
+const PANEL_SCALE = 1
 
 /**
  * Erzeugt ein Spatial-UI-Panel als CSS3DObject.

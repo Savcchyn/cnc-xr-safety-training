@@ -23,16 +23,21 @@ import {
   buildNotificationEditor,
 } from './panels.js'
 
-const V3 = (x, y, z) => new THREE.Vector3(x, y, z)
+import { U } from './units.js'
+
+// Welt-Koordinaten (Meter → Szenen-Einheiten)
+const V3 = (x, y, z) => new THREE.Vector3(x * U, y * U, z * U)
+// Maschinen-lokale Koordinaten (Meter — die Maschinen-Gruppe skaliert selbst mit U)
+const V3m = (x, y, z) => new THREE.Vector3(x, y, z)
 
 // Positionen der Interaktionspunkte (lokal zur Maschinen-Gruppe,
 // abgestimmt auf die geladenen GLB-Modelle)
 const HOTSPOT_POSITIONS = {
-  'panel-top': V3(-0.3, 1.78, 1.15),
-  'panel-estop': V3(-1.18, 1.2, 1.3),
-  'cabinet-door': V3(-0.74, 0.5, 1.25),
-  spindle: V3(0.62, 1.62, 0.8),
-  table: V3(1.55, 1.18, 1.0),
+  'panel-top': V3m(-0.3, 1.78, 1.15),
+  'panel-estop': V3m(-1.18, 1.2, 1.3),
+  'cabinet-door': V3m(-0.74, 0.5, 1.25),
+  spindle: V3m(0.62, 1.62, 0.8),
+  table: V3m(1.55, 1.18, 1.0),
 }
 
 export class Flow {
@@ -342,8 +347,8 @@ export class Flow {
     // Fragepanel neben dem Interaktionspunkt platzieren (Weltkoordinaten)
     const worldPos = sprite.getWorldPosition(new THREE.Vector3())
     const pos = worldPos.clone()
-    pos.y -= 0.35
-    pos.z += 0.55
+    pos.y -= 0.35 * U
+    pos.z += 0.55 * U
     this.showPanel('task', true, pos, 0.1)
   }
 
@@ -414,8 +419,8 @@ export class Flow {
     el.className = 'gear-hotspot'
     el.innerHTML = GEAR_SVG
     const sprite = new CSS3DSprite(el)
-    sprite.scale.setScalar(0.0026)
-    sprite.position.set(0, 1.15, 2.9)
+    sprite.scale.setScalar(1.2)
+    sprite.position.copy(V3(0, 1.15, 2.9))
     el.addEventListener('click', (e) => {
       e.stopPropagation()
       this.grabbed = sprite
@@ -441,11 +446,11 @@ export class Flow {
         const normal = hit.face
           ? hit.face.normal.clone().transformDirection(hit.object.matrixWorld)
           : new THREE.Vector3(0, 0, 1)
-        this.grabbed.position.copy(hit.point).addScaledVector(normal, 0.12)
+        this.grabbed.position.copy(hit.point).addScaledVector(normal, 0.12 * U)
       } else {
         // Frei vor der Kamera schweben lassen
         const dir = this.raycaster.ray.direction.clone()
-        this.grabbed.position.copy(this.camera.position).addScaledVector(dir, 2.2)
+        this.grabbed.position.copy(this.camera.position).addScaledVector(dir, 2.2 * U)
       }
     })
 

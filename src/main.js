@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { CSS3DRenderer } from 'three/examples/jsm/renderers/CSS3DRenderer.js'
+import { U } from './units.js'
 import { World } from './world.js'
 import { FPControls } from './controls.js'
 import { Flow } from './flow.js'
@@ -26,10 +27,10 @@ const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera(
   60,
   window.innerWidth / window.innerHeight,
-  0.05,
-  100
+  0.05 * U,
+  120 * U
 )
-camera.position.set(0, 1.65, 4.6)
+camera.position.set(0, 1.65 * U, 4.6 * U)
 
 const world = new World(scene)
 const controls = new FPControls(camera, renderer.domElement)
