@@ -473,6 +473,7 @@ export function buildCmsPanel(handlers) {
     'cms-panel',
     `
     <div class="start-glow cms-glow"></div>
+    <div class="cms-inner">
     <button class="btn chip" data-action="back">${c.back}</button>
     <h2 class="cms-title">${c.title}</h2>
     <div class="cms-row">
@@ -508,6 +509,7 @@ export function buildCmsPanel(handlers) {
       <button class="btn cms-add" data-action="delete-module"><span class="icon">✕</span>${c.deleteModule}</button>
     </div>
     <button class="btn cms-add cms-wide" data-action="edit-notifications"><span class="icon">🔔</span>${c.editNotifications}</button>
+    </div>
     `,
     {
       back: handlers.back,

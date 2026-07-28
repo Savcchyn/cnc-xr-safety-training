@@ -68,6 +68,15 @@ const HOTSPOT_POSITIONS = {
     spindle: V3m(0, 1.55, 0.55),
     table: V3m(-0.15, 1.05, 0.85),
   },
+  // Maschine 3: CNC-Drehmaschine — Positionen an den echten Mesh-Zentren
+  // (Display, Keyboard, Sichtfenster, Spindelseite, Bett) ausgerichtet
+  m3: {
+    'panel-top': V3m(0.16, 1.35, 0.65),
+    'panel-estop': V3m(0.5, 0.85, 0.85),
+    'cabinet-door': V3m(-0.55, 0.85, 0.5),
+    spindle: V3m(-1.15, 1.05, 0.45),
+    table: V3m(1.0, 0.6, 0.5),
+  },
 }
 
 export class Flow {
@@ -301,8 +310,9 @@ export class Flow {
         const scenario = ['fire', 'water', 'wood'][Math.floor(Math.random() * 3)]
         this.world.showConsequence(scenario)
         if (scenario === 'wood') {
-          // Maschine 2 (Metall): durchdrehender Bohrer statt Holz-Knacksen
-          if (this.machineKey === 'm2') playDrillSound()
+          // Metallmaschinen (Fräse 2, Drehmaschine 3): durchdrehender
+          // Bohrer statt Holz-Knacksen
+          if (this.machineKey !== 'm1') playDrillSound()
           else playWoodCrack()
         } else if (scenario === 'fire') {
           playFireSound()
@@ -482,8 +492,8 @@ export class Flow {
     }
     if (key === 'machine') {
       // Maschine erscheint hinter dem Panel (Trainings Selection);
-      // Maschine 2 = Fräsmaschinen-Modell, 1 & 3 = Holzfräse
-      this.machineKey = index === 1 ? 'm2' : 'm1'
+      // 1 = Holzfräse, 2 = Fräsmaschine, 3 = Drehmaschine
+      this.machineKey = ['m1', 'm2', 'm3'][index] || 'm1'
       this.world.setMachineVariant(this.machineKey)
       this.world.gearField.visible = false
       this.world.setMachineMode(this.mode)

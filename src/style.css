@@ -842,13 +842,26 @@ body.mini-grabbed #hint-mini {
 }
 
 /* ---------- CMS ---------- */
+/* Transparenter Wrapper: Glow als erstes Kind, Inhalt in .cms-inner darüber
+   (DOM-Reihenfolge statt negativem z-index — zuverlässig auch in Firefox) */
 .cms-panel {
   width: 980px;
-  padding: 40px 46px;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
   position: relative;
 }
 
+.cms-inner {
+  position: relative;
+  background: var(--panel);
+  border-radius: 30px;
+  padding: 40px 46px;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4);
+}
+
 .cms-glow {
+  z-index: auto;
   border-radius: 60px;
   top: -70px;
   left: -60px;

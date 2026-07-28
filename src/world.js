@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { CSS3DSprite } from 'three/examples/jsm/renderers/CSS3DRenderer.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js'
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
 import { U } from './units.js'
 
 export const GEAR_SVG = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>`
@@ -79,6 +80,16 @@ export class World {
         ],
         // Metallmaschine → Metallsplitter statt Holz
         splinter: { x: [-0.45, 0.45], y: [1.0, 1.15], z: [-0.25, 0.35], style: 'metal' },
+      },
+      m3: {
+        fireSpots: [
+          [-0.5, 1.45, 0.15],
+          [0.3, 1.35, 0.4],
+          [1.0, 1.15, 0.4],
+          [-1.2, 1.1, 0.4],
+        ],
+        // Drehmaschine → Metallsplitter aus dem Arbeitsraum am Sichtfenster
+        splinter: { x: [-0.9, -0.2], y: [0.8, 1.0], z: [0.1, 0.4], style: 'metal' },
       },
     }
     this.loadMachineModel()
@@ -197,7 +208,6 @@ export class World {
       } else {
         console.error('[world] Milling-GLB fehlt:', milling.reason)
       }
-      this.setMachineVariant(this.variant)
 
       // Control Panel: liegt im GLB flach → aufrichten (rotX 90°),
       // auf Konsolenbreite skalieren und bündig auf die Pult-Front
@@ -218,17 +228,99 @@ export class World {
       } else {
         console.error('[world] Bedienpult-GLB fehlt:', panel.reason)
       }
+
+      this.setMachineVariant(this.variant)
     })
+
+    // Maschine 3: CNC-Drehmaschine (OBJ ohne Texturen) — Materialien
+    // werden anhand der Materialgruppen zugewiesen
+    new OBJLoader().load(
+      `${import.meta.env.BASE_URL}models/lathe/cnc-lathe.obj`,
+      (obj) => {
+        // Farbschema nach Referenz-Render: weißes Gehäuse, navy Basis &
+        // Rückwand, dunkles Sichtfenster, Chrom-Trim, leuchtender Screen
+        const MATS = {
+          white: new THREE.MeshStandardMaterial({ color: 0xf0efec, roughness: 0.42 }),
+          navy: new THREE.MeshStandardMaterial({ color: 0x2b3040, roughness: 0.55 }),
+          navyDark: new THREE.MeshStandardMaterial({ color: 0x222634, roughness: 0.6 }),
+          glass: new THREE.MeshStandardMaterial({
+            color: 0x1d2126,
+            roughness: 0.15,
+            metalness: 0.4,
+          }),
+          chrome: new THREE.MeshStandardMaterial({
+            color: 0xb9bdc4,
+            roughness: 0.28,
+            metalness: 0.75,
+          }),
+          screen: new THREE.MeshStandardMaterial({
+            color: 0x10151a,
+            roughness: 0.3,
+            emissive: 0x0e3644,
+            emissiveIntensity: 0.9,
+          }),
+          keys: new THREE.MeshStandardMaterial({ color: 0x33363c, roughness: 0.6 }),
+          armGray: new THREE.MeshStandardMaterial({ color: 0xd8d6d1, roughness: 0.5 }),
+        }
+        const pick = (name) => {
+          if (name.includes('display')) return MATS.screen
+          if (name.includes('_kb')) return MATS.keys
+          if (name.includes('grid')) return MATS.navyDark
+          if (name.includes('door')) return MATS.glass
+          if (name.includes('logo')) return MATS.navy
+          if (name.includes('detail')) return MATS.chrome
+          if (name.includes('control')) return MATS.armGray
+          if (name.includes('body')) return MATS.navy
+          return MATS.white
+        }
+        obj.traverse((o) => {
+          if (!o.isMesh) return
+          o.material = pick(o.name.toLowerCase())
+          o.castShadow = true
+          o.receiveShadow = true
+        })
+        // 3ds-Max-Export ist Z-up → aufrichten
+        obj.rotation.x = -Math.PI / 2
+        const wrapper = (() => {
+          const box = new THREE.Box3().setFromObject(obj)
+          const size = box.getSize(new THREE.Vector3())
+          const scale = 3.0 / Math.max(size.x, size.z)
+          obj.scale.setScalar(scale)
+          const scaledBox = new THREE.Box3().setFromObject(obj)
+          const center = scaledBox.getCenter(new THREE.Vector3())
+          const w = new THREE.Group()
+          w.add(obj)
+          obj.position.set(-center.x, -scaledBox.min.y, -center.z)
+          console.log('[world] Lathe-OBJ normalisiert:', {
+            rawSize: size.toArray().map((v) => v.toFixed(2)),
+            scale: scale.toFixed(4),
+          })
+          return w
+        })()
+        this.m3 = new THREE.Group()
+        this.m3.add(wrapper)
+        this.m3.visible = false
+        this.machine.add(this.m3)
+        this.setMachineVariant(this.variant)
+      },
+      undefined,
+      (err) => console.error('[world] Lathe-OBJ konnte nicht geladen werden:', err)
+    )
   }
 
   /**
-   * Maschinen-Variante wählen: 'm1' Holzfräse (auch Fallback für
-   * Maschine 3), 'm2' Fräsmaschine. Effekte nutzen die passende Region.
+   * Maschinen-Variante wählen: 'm1' Holzfräse, 'm2' Fräsmaschine,
+   * 'm3' Drehmaschine. Effekte nutzen die passende Region.
    */
   setMachineVariant(key) {
-    this.variant = key === 'm2' && this.m2 ? 'm2' : 'm1'
-    if (this.m1) this.m1.visible = this.variant === 'm1'
-    if (this.m2) this.m2.visible = this.variant === 'm2'
+    // Gewünschte Variante merken — noch ladende Modelle blenden sich
+    // nach dem Laden über den erneuten Aufruf selbst ein
+    this.variant = key
+    const available = { m1: this.m1, m2: this.m2, m3: this.m3 }
+    const shown = available[key] ? key : 'm1'
+    for (const [k, group] of Object.entries(available)) {
+      if (group) group.visible = k === shown
+    }
   }
 
   /**
