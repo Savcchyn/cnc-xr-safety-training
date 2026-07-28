@@ -2,7 +2,10 @@
 <html lang="de">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
     <meta name="theme-color" content="#2a2827" />
     <title>CNC Sicherheitstraining — AR App</title>
   </head>
@@ -100,6 +103,19 @@
             <button class="sheet-arrow" data-cycle="1">▶</button>
           </div>
           <div class="sheet-answers"></div>
+        </div>
+
+        <!-- Anfänger-Onboarding Sheet -->
+        <div class="sheet ob-sheet">
+          <p class="ob-kicker">Onboarding</p>
+          <h3 class="ob-action"></h3>
+          <p class="ob-text"></p>
+          <div class="ob-nav">
+            <button class="ob-arrow ob-prev" aria-label="Vorheriger Schritt">◀</button>
+            <span class="ob-step"></span>
+            <button class="ob-arrow ob-next" aria-label="Nächster Schritt">▶</button>
+          </div>
+          <button class="ob-start">Training starten</button>
         </div>
 
         <!-- Ergebnis / Konsequenz Sheet -->

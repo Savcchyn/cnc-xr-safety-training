@@ -168,6 +168,12 @@ function exitViewer() {
 function startMode() {
   if (app.mode === 'training') {
     app.tasks = content.tasks.map((t) => ({ ...t, answered: null }))
+    // Anfänger bekommen zuerst das geführte Onboarding
+    if (app.level === 0 && !app.onboardingDone) {
+      buildGears(false)
+      startOnboarding()
+      return
+    }
     buildGears(true)
   } else if (app.mode === 'arquiz') {
     const pool = QUIZ_POOL.filter((q) => !q.machine || q.machine === app.machine)
@@ -183,13 +189,14 @@ function buildGears(interactive) {
   layer.innerHTML = ''
   gearEls = []
   activeIndex = -1
-  if (!interactive) return
   const keys = Object.keys(HOTSPOTS[app.machine])
   keys.forEach((key, i) => {
     const b = document.createElement('button')
     b.className = 'gear'
     b.innerHTML = GEAR_SVG
-    b.addEventListener('click', () => openPoint(i))
+    if (interactive) b.addEventListener('click', () => openPoint(i))
+    else b.style.pointerEvents = 'none'
+    b.style.display = 'none'
     layer.appendChild(b)
     gearEls.push({ el: b, key })
   })
@@ -287,6 +294,45 @@ function closeSheets() {
   $('.viewer-cl').classList.remove('open')
 }
 
+/* ---------------- Anfänger-Onboarding ---------------- */
+
+let obIndex = 0
+
+function startOnboarding() {
+  obIndex = 0
+  applyObStep(0)
+  $('.ob-sheet').classList.add('open')
+}
+
+function applyObStep(i) {
+  obIndex = Math.max(0, Math.min(app.tasks.length - 1, i))
+  const task = app.tasks[obIndex]
+  const exp = content.taskExplanations[task.id] || {}
+  const positions = HOTSPOTS[app.machine]
+
+  gearEls.forEach(({ el }, idx) => {
+    el.classList.toggle('answered', idx < obIndex)
+    el.classList.toggle('active', idx === obIndex)
+  })
+  scene.yawTo(positions[task.id])
+
+  $('.ob-action').textContent = exp.action || ''
+  $('.ob-text').textContent = (exp.text || '').replace(/\n/g, ' ')
+  $('.ob-step').textContent = `Schritt ${obIndex + 1} von ${app.tasks.length}`
+  $('.ob-prev').disabled = obIndex === 0
+  const last = obIndex === app.tasks.length - 1
+  $('.ob-next').style.visibility = last ? 'hidden' : 'visible'
+  $('.ob-sheet').classList.toggle('last', last)
+}
+
+$('.ob-prev').addEventListener('click', () => applyObStep(obIndex - 1))
+$('.ob-next').addEventListener('click', () => applyObStep(obIndex + 1))
+$('.ob-start').addEventListener('click', () => {
+  app.onboardingDone = true
+  $('.ob-sheet').classList.remove('open')
+  startMode()
+})
+
 /* ---------------- Auswertung & Konsequenz ---------------- */
 
 function evaluateTraining() {
@@ -379,6 +425,7 @@ function restartViewerMode() {
 
 function leaveViewer() {
   app.duell = null
+  app.onboardingDone = false
   app.stack = []
   go('home', false)
 }

@@ -77,6 +77,7 @@ export class ArScene {
     this.variant = 'm1'
     this.placed = false
     this.orbit = { yaw: 0.5, pitch: 0.3, dist: 6.2 }
+    this.yawTarget = null
     this.fires = []
     this.splinters = []
     this.waterGroup = null
@@ -193,6 +194,11 @@ export class ArScene {
     this.popScale = 0.001
   }
 
+  /** Kamera weich um das Modell drehen, bis der Hotspot frontal steht. */
+  yawTo(localPos) {
+    this.yawTarget = Math.atan2(localPos[0], localPos[2])
+  }
+
   reset() {
     this.orbit = { yaw: 0.5, pitch: 0.3, dist: 6.2 }
   }
@@ -214,6 +220,7 @@ export class ArScene {
       pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
 
       if (pointers.size === 1) {
+        this.yawTarget = null
         this.orbit.yaw -= dx * 0.008
         this.orbit.pitch = THREE.MathUtils.clamp(this.orbit.pitch + dy * 0.004, 0.05, 1.1)
       } else if (pointers.size === 2) {
@@ -366,6 +373,14 @@ export class ArScene {
       this.popScale = Math.min(1, this.popScale + dt * 2.6)
       const s = 1 - Math.pow(1 - this.popScale, 3)
       this.machine.scale.setScalar(s)
+    }
+
+    // Weiches Nachdrehen zum Ziel-Hotspot (Onboarding)
+    if (this.yawTarget !== null) {
+      let d = this.yawTarget - this.orbit.yaw
+      d = ((((d + Math.PI) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2)) - Math.PI
+      this.orbit.yaw += d * Math.min(1, 4 * dt)
+      if (Math.abs(d) < 0.01) this.yawTarget = null
     }
 
     // Orbit-Kamera um das Modell
