@@ -219,5 +219,5 @@ export const WORKFLOW = [
   },
 ]
 
-// ShapesXR Demo Space — Link folgt von Irena
-export const SHAPESXR_URL = ''
+export const SHAPESXR_URL =
+  'https://shapes.app/space/view/cee35e42-05ba-4de7-a030-b9c90b744387/9z736r53'
