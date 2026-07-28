@@ -28,6 +28,7 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         prototyp: resolve(__dirname, 'prototyp/index.html'),
+        ar: resolve(__dirname, 'ar/index.html'),
       },
     },
   },

@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#2a2827" />
+    <title>CNC Sicherheitstraining — AR App</title>
+  </head>
+  <body>
+    <div id="ar-app">
+      <!-- Fake Status Bar (Klick-Dummy) -->
+      <div class="statusbar"><span class="sb-time">19:51</span><span class="sb-signal">▮▮▮</span></div>
+
+      <!-- Maschinen-Auswahl -->
+      <section class="screen" id="s-maschine">
+        <button class="chip back" data-back>zurück</button>
+        <div class="menu-stack">
+          <button class="menu-card" data-machine="m1">Maschine 1</button>
+          <button class="menu-card" data-machine="m2">Maschine 2</button>
+          <button class="menu-card" data-machine="m3">Maschine 3</button>
+        </div>
+      </section>
+
+      <!-- Erfahrungsstand -->
+      <section class="screen" id="s-level">
+        <button class="chip back" data-back>zurück</button>
+        <div class="menu-stack">
+          <button class="menu-card" data-level="0">Anfänger</button>
+          <button class="menu-card" data-level="1">Erfahren</button>
+          <button class="menu-card" data-level="2">Experte</button>
+        </div>
+      </section>
+
+      <!-- Hauptmenü -->
+      <section class="screen" id="s-home">
+        <button class="chip back" data-back>zurück</button>
+        <div class="menu-stack">
+          <button class="menu-card" data-go="kamera" data-mode="training">Trainingssimulation</button>
+          <button class="menu-card" data-go="quizmenu">Quiz</button>
+          <button class="menu-card" data-go="module">Checklisten</button>
+        </div>
+      </section>
+
+      <!-- Quiz-Untermenü -->
+      <section class="screen" id="s-quizmenu">
+        <button class="chip back" data-back>zurück</button>
+        <div class="menu-stack two">
+          <button class="menu-card" data-go="kamera" data-mode="arquiz">AR Quiz</button>
+          <button class="menu-card" data-go="duell">Quiz Duell</button>
+        </div>
+      </section>
+
+      <!-- Checklisten: Modul-Auswahl -->
+      <section class="screen" id="s-module">
+        <button class="chip back" data-back>zurück</button>
+        <h2 class="screen-title">Checklisten<br /><span class="screen-sub"></span></h2>
+        <div class="module-list"></div>
+      </section>
+
+      <!-- Checkliste -->
+      <section class="screen" id="s-checkliste">
+        <button class="chip back" data-back>zurück</button>
+        <p class="cl-kicker"></p>
+        <h2 class="cl-title"></h2>
+        <div class="cl-items"></div>
+      </section>
+
+      <!-- Kamera öffnen -->
+      <section class="screen" id="s-kamera">
+        <button class="chip back" data-back>zurück</button>
+        <button class="camera-open" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9.4 4.5 8 6.5H4.5A1.5 1.5 0 0 0 3 8v10a1.5 1.5 0 0 0 1.5 1.5h15A1.5 1.5 0 0 0 21 18V8a1.5 1.5 0 0 0-1.5-1.5H16l-1.4-2H9.4Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+            <circle cx="12" cy="12.7" r="3.3" fill="none" stroke="currentColor" stroke-width="1.7"/>
+          </svg>
+          <span>Kamera öffnen</span>
+        </button>
+      </section>
+
+      <!-- AR Viewer -->
+      <section class="screen" id="s-viewer">
+        <div class="camera-sim"></div>
+        <canvas id="ar-canvas"></canvas>
+        <div class="gear-layer"></div>
+
+        <button class="chip back viewer-chip" data-back>zurück</button>
+        <button class="chip viewer-checklist"><span class="eye">👁</span> Checkliste</button>
+
+        <!-- Scan / Platzierung -->
+        <div class="scan-overlay">
+          <div class="scan-ring"></div>
+          <p class="scan-text">Bewege das Handy langsam über die Fläche …</p>
+        </div>
+
+        <!-- Task / Quiz Bottom Sheet -->
+        <div class="sheet task-sheet">
+          <div class="sheet-head">
+            <button class="sheet-arrow" data-cycle="-1">◀</button>
+            <h3 class="sheet-question">Was gibt es hier zu tun?</h3>
+            <button class="sheet-arrow" data-cycle="1">▶</button>
+          </div>
+          <div class="sheet-answers"></div>
+        </div>
+
+        <!-- Ergebnis / Konsequenz Sheet -->
+        <div class="sheet result-sheet">
+          <h3 class="result-title"></h3>
+          <p class="result-text"></p>
+          <div class="result-actions"></div>
+        </div>
+
+        <!-- Checklisten-Overlay im Viewer -->
+        <aside class="viewer-cl">
+          <button class="chip back" data-close-cl>schließen</button>
+          <p class="cl-kicker"></p>
+          <h2 class="cl-title"></h2>
+          <div class="cl-items small"></div>
+        </aside>
+      </section>
+
+      <!-- Quiz Duell -->
+      <section class="screen" id="s-duell">
+        <button class="chip back" data-back>zurück</button>
+        <div class="duell-hud">
+          <div class="duell-side you">
+            <span class="avatar">🧑‍🏭</span>
+            <span class="d-name">Du</span>
+            <span class="d-score" id="score-you">0</span>
+          </div>
+          <div class="duell-round">Frage <span id="round-num">1</span>/5</div>
+          <div class="duell-side bot">
+            <span class="avatar">👷</span>
+            <span class="d-name">Marco</span>
+            <span class="d-score" id="score-bot">0</span>
+          </div>
+        </div>
+        <div class="quiz-card">
+          <p class="quiz-question"></p>
+        </div>
+        <div class="quiz-grid"></div>
+        <button class="confirm-btn" disabled>Bestätigen</button>
+        <div class="timer-wrap">
+          <span class="timer-label">Timer</span>
+          <div class="timer-bar"><div class="timer-fill"></div></div>
+        </div>
+        <div class="bot-status">👷 Marco überlegt …</div>
+      </section>
+    </div>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

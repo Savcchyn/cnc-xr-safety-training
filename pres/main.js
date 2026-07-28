@@ -42,6 +42,7 @@ function goTo(index) {
   nav.classList.toggle('fs-low', ['produkt', 'webdemo'].includes(slides[current].id))
   history.replaceState(null, '', `#${slides[current].id}`)
   if (slides[current].id === 'webdemo') mountDemo()
+  if (slides[current].id === 'arapp') mountAr()
 }
 
 nav.querySelector('.nav-prev').addEventListener('click', () => goTo(current - 1))
@@ -202,6 +203,19 @@ document.querySelector('.demo-fullscreen').addEventListener('click', () => {
   mountDemo()
   toggleFullscreen(document.querySelector('.demo-frame'))
 })
+
+/* ---------------- AR App im Phone-Mock ---------------- */
+
+let arMounted = false
+function mountAr() {
+  if (arMounted) return
+  arMounted = true
+  const screen = document.querySelector('.phone-live')
+  const iframe = document.createElement('iframe')
+  iframe.src = '/ar/'
+  iframe.title = 'AR App Klick-Dummy'
+  screen.appendChild(iframe)
+}
 
 /* ---------------- Workflow ---------------- */
 
