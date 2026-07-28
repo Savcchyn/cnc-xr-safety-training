@@ -128,6 +128,71 @@ export function playWaterSound() {
   }
 }
 
+/**
+ * Durchdrehender Bohrer/Schrauber: hochdrehendes Motor-Jaulen mit
+ * Drehzahl-Flattern + schnelles Ratter-Klackern wie ein rutschendes Futter.
+ */
+export function playDrillSound() {
+  try {
+    const c = getCtx()
+    const t = c.currentTime
+    const DUR = 2.6
+
+    // Motor-Jaulen: zwei leicht verstimmte Sägezähne, Drehzahl zieht hoch
+    for (const detune of [0, 9]) {
+      const osc = c.createOscillator()
+      osc.type = 'sawtooth'
+      osc.detune.value = detune
+      osc.frequency.setValueAtTime(180, t)
+      osc.frequency.exponentialRampToValueAtTime(620, t + 0.7)
+      osc.frequency.setValueAtTime(620, t + 0.7)
+      osc.frequency.exponentialRampToValueAtTime(480, t + DUR)
+
+      // Drehzahl-Flattern (durchdrehen): LFO auf die Frequenz
+      const lfo = c.createOscillator()
+      lfo.frequency.value = 11
+      const lfoGain = c.createGain()
+      lfoGain.gain.value = 42
+      lfo.connect(lfoGain).connect(osc.frequency)
+
+      const bp = c.createBiquadFilter()
+      bp.type = 'bandpass'
+      bp.frequency.value = 1300
+      bp.Q.value = 0.8
+      const g = c.createGain()
+      g.gain.setValueAtTime(0, t)
+      g.gain.linearRampToValueAtTime(0.14, t + 0.12)
+      g.gain.setValueAtTime(0.14, t + DUR - 0.5)
+      g.gain.exponentialRampToValueAtTime(0.001, t + DUR)
+      osc.connect(bp).connect(g).connect(c.destination)
+      osc.start(t)
+      osc.stop(t + DUR + 0.1)
+      lfo.start(t)
+      lfo.stop(t + DUR + 0.1)
+    }
+
+    // Ratter-Klackern: schnelle Noise-Ticks wie ein rutschendes Bohrfutter
+    for (let i = 0; i < 34; i++) {
+      const start = 0.25 + i * 0.065 + Math.random() * 0.02
+      if (start > DUR - 0.15) break
+      const src = c.createBufferSource()
+      src.buffer = getNoiseBuffer(c)
+      const bp = c.createBiquadFilter()
+      bp.type = 'bandpass'
+      bp.frequency.value = 3400 + Math.random() * 1200
+      bp.Q.value = 4
+      const g = c.createGain()
+      g.gain.setValueAtTime(0.1 + Math.random() * 0.08, t + start)
+      g.gain.exponentialRampToValueAtTime(0.001, t + start + 0.03)
+      src.connect(bp).connect(g).connect(c.destination)
+      src.start(t + start)
+      src.stop(t + start + 0.05)
+    }
+  } catch {
+    // Audio nicht verfügbar
+  }
+}
+
 /** Holz-Knacksen: tiefer Schlag + drei kurze Knack-Bursts aus gefiltertem Rauschen. */
 export function playWoodCrack() {
   try {

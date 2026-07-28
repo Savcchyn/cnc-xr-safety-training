@@ -77,7 +77,8 @@ export class World {
           [0.55, 1.3, 0.3],
           [0, 1.1, 0.7],
         ],
-        splinter: { x: [-0.45, 0.45], y: [1.0, 1.15], z: [-0.25, 0.35] },
+        // Metallmaschine → Metallsplitter statt Holz
+        splinter: { x: [-0.45, 0.45], y: [1.0, 1.15], z: [-0.25, 0.35], style: 'metal' },
       },
     }
     this.loadMachineModel()
@@ -440,10 +441,24 @@ export class World {
     this.waterGroup = group
   }
 
-  /** Werkstück birst: Holzsplitter fliegen von der Tischfläche. */
+  /**
+   * Werkstück birst: Splitter fliegen von der Tischfläche.
+   * Holzfräse → Holzsplitter, Fräsmaschine → Metallsplitter/Späne.
+   */
   spawnSplinters() {
     const group = new THREE.Group()
-    const mats = [MAT.wood, MAT.woodLight, new THREE.MeshStandardMaterial({ color: 0x8a6a42, roughness: 0.85 })]
+    const metal = this.effects.splinter.style === 'metal'
+    const mats = metal
+      ? [
+          new THREE.MeshStandardMaterial({ color: 0xc2c7cd, roughness: 0.25, metalness: 0.9 }),
+          new THREE.MeshStandardMaterial({ color: 0x8e939a, roughness: 0.3, metalness: 0.85 }),
+          new THREE.MeshStandardMaterial({ color: 0x6d7278, roughness: 0.35, metalness: 0.8 }),
+        ]
+      : [
+          MAT.wood,
+          MAT.woodLight,
+          new THREE.MeshStandardMaterial({ color: 0x8a6a42, roughness: 0.85 }),
+        ]
     const rng = (a, b) => a + Math.random() * (b - a)
 
     this.splinters = []
@@ -451,9 +466,14 @@ export class World {
     const count = 30
     for (let i = 0; i < count; i++) {
       const big = i < 5 // ein paar größere Bruchstücke
-      const geo = big
-        ? new THREE.BoxGeometry(rng(0.22, 0.36), 0.03, rng(0.08, 0.16))
-        : new THREE.BoxGeometry(rng(0.04, 0.15), 0.014, rng(0.015, 0.05))
+      // Metallsplitter sind dünner und länglicher als Holzbruchstücke
+      const geo = metal
+        ? big
+          ? new THREE.BoxGeometry(rng(0.16, 0.26), 0.012, rng(0.03, 0.06))
+          : new THREE.BoxGeometry(rng(0.04, 0.14), 0.007, rng(0.008, 0.025))
+        : big
+          ? new THREE.BoxGeometry(rng(0.22, 0.36), 0.03, rng(0.08, 0.16))
+          : new THREE.BoxGeometry(rng(0.04, 0.15), 0.014, rng(0.015, 0.05))
       const mesh = new THREE.Mesh(geo, mats[i % mats.length])
       mesh.castShadow = true
       mesh.position.set(rng(...region.x), rng(...region.y), rng(...region.z))

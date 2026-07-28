@@ -2,7 +2,13 @@ import * as THREE from 'three'
 import { CSS3DSprite } from 'three/examples/jsm/renderers/CSS3DRenderer.js'
 import { content } from './content.js'
 import { GEAR_SVG } from './world.js'
-import { playNotifSound, playWoodCrack, playFireSound, playWaterSound } from './audio.js'
+import {
+  playNotifSound,
+  playWoodCrack,
+  playFireSound,
+  playWaterSound,
+  playDrillSound,
+} from './audio.js'
 import {
   buildStartPanel,
   buildModulePanel,
@@ -91,6 +97,8 @@ export class Flow {
     // Miniatur-Modell: greifen, positionieren, skalieren, drehen
     this.mini = { grabbed: false, lift: 0.06 * U, keys: new Set() }
     this.hands = []
+    // Soll-Drehung der Maschine (Korrektur-Simulation), null = keine Vorgabe
+    this.machineYawTarget = null
     this.groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0)
     this.hintMini = document.getElementById('hint-mini')
 
@@ -244,6 +252,7 @@ export class Flow {
     if (this.mini.grabbed) this.dropMini()
     this.world.clearConsequence()
     this.world.hideHand()
+    this.machineYawTarget = null
 
     const go = (pos, look, dur) => this.controls.goTo(V3(...pos), V3(...look), dur)
 
@@ -291,9 +300,15 @@ export class Flow {
         // Konsequenz-Szenario zufällig wählen: Brand, Leckage oder Splitterflug
         const scenario = ['fire', 'water', 'wood'][Math.floor(Math.random() * 3)]
         this.world.showConsequence(scenario)
-        if (scenario === 'wood') playWoodCrack()
-        else if (scenario === 'fire') playFireSound()
-        else playWaterSound()
+        if (scenario === 'wood') {
+          // Maschine 2 (Metall): durchdrehender Bohrer statt Holz-Knacksen
+          if (this.machineKey === 'm2') playDrillSound()
+          else playWoodCrack()
+        } else if (scenario === 'fire') {
+          playFireSound()
+        } else {
+          playWaterSound()
+        }
         this.markHotspotResults()
         this.spawnHotspots(false)
         this.showPanel('consequence', true, V3(0.1, 1.85, 1.9))
@@ -403,26 +418,27 @@ export class Flow {
 
   spawnErrorCards() {
     this.clearErrorCards()
-    const positions = HOTSPOT_POSITIONS[this.machineKey] || HOTSPOT_POSITIONS.m1
-    for (const task of this.tasks) {
-      if (task.answered === task.correct) continue
+    this.tasks.forEach((task, i) => {
+      if (task.answered === task.correct) return
       const card = buildErrorCard(task)
-      const worldPos = positions[task.id].clone().applyMatrix4(this.world.machine.matrixWorld)
-      worldPos.y += 0.42 * U
-      worldPos.z += 0.3 * U
-      card.object.position.copy(worldPos)
       this.scene.add(card.object)
-      this.errorCards.push(card.object)
-    }
+      // Position & Billboarding folgen dem Hotspot in update() —
+      // so bleiben die Karten auch bei rotierender Maschine korrekt
+      this.errorCards.push({ object: card.object, sprite: this.hotspots[i] })
+    })
   }
 
   clearErrorCards() {
     if (!this.errorCards) this.errorCards = []
-    for (const c of this.errorCards) c.removeFromParent()
+    for (const c of this.errorCards) c.object.removeFromParent()
     this.errorCards = []
   }
 
-  /** Die 3D-Hand führt alle falsch beantworteten Tasks korrekt aus. */
+  /**
+   * Die 3D-Hand führt alle falsch beantworteten Tasks korrekt aus.
+   * Die Maschine dreht sich dabei so, dass der aktuelle Task Point
+   * (und damit die Hand-Aktion) zum User zeigt.
+   */
   runCorrectSimulation() {
     const positions = HOTSPOT_POSITIONS[this.machineKey] || HOTSPOT_POSITIONS.m1
     const wrong = this.tasks
@@ -436,17 +452,23 @@ export class Flow {
 
     wrong.forEach(({ task, sprite }, i) => {
       this.setTimer(() => {
-        this.world.moveHandTo(positions[task.id])
+        // Maschine zum User drehen: Hotspot-Richtung → Kamera-Richtung
+        const pos = positions[task.id]
+        const camDir = this.camera.position.clone().sub(this.world.machine.position)
+        this.machineYawTarget =
+          Math.atan2(camDir.x, camDir.z) - Math.atan2(pos.x, pos.z)
+        this.world.moveHandTo(pos)
         this.setTimer(() => {
           sprite.element.classList.remove('bad')
           sprite.element.classList.add('ok')
-        }, 1.2)
-      }, i * 2.2)
+        }, 1.4)
+      }, i * 2.6)
     })
     this.setTimer(() => {
       this.world.hideHand()
+      this.machineYawTarget = 0 // zurück in Ausgangslage drehen
       this.toast(content.reviewErrors.simulationDone)
-    }, wrong.length * 2.2 + 0.5)
+    }, wrong.length * 2.6 + 0.5)
   }
 
   /* ---------------- Startscreen ---------------- */
@@ -859,6 +881,32 @@ export class Flow {
       let delta = target - o.rotation.y
       delta = ((((delta + Math.PI) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2)) - Math.PI
       o.rotation.y += delta * k
+    }
+
+    // Maschine weich zur Soll-Drehung bringen (Korrektur-Simulation)
+    if (this.machineYawTarget !== null) {
+      const m = this.world.machine
+      let d = this.machineYawTarget - m.rotation.y
+      d = ((((d + Math.PI) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2)) - Math.PI
+      m.rotation.y += d * Math.min(1, 3.5 * dt)
+    }
+
+    // Fehler-Karten folgen ihren Hotspots (auch bei rotierender Maschine)
+    // und billboarden zum User
+    if (this.errorCards.length) {
+      const camOffset = new THREE.Vector3()
+      for (const { object, sprite } of this.errorCards) {
+        sprite.getWorldPosition(object.position)
+        camOffset.subVectors(this.camera.position, object.position)
+        camOffset.y = 0
+        camOffset.normalize()
+        object.position.y += 0.42 * U
+        object.position.addScaledVector(camOffset, 0.3 * U)
+        object.rotation.y = Math.atan2(
+          this.camera.position.x - object.position.x,
+          this.camera.position.z - object.position.z
+        )
+      }
     }
 
     // Miniatur drehen (Q/E) während sie gegriffen ist
