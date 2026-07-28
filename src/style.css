@@ -1,0 +1,1091 @@
+:root {
+  --orange: #f2762e;
+  --orange-soft: #f5913f;
+  --panel: #2e2c2b;
+  --panel-soft: #3a3836;
+  --line: rgba(255, 255, 255, 0.85);
+  --yellow: #f0c33c;
+  --font: 'Futura', 'Avenir Next', 'Century Gothic', 'Trebuchet MS', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font);
+  background: linear-gradient(#c7c7c7 0%, #bdbcbb 55%, #9d9c9a 100%);
+}
+
+#app {
+  position: fixed;
+  inset: 0;
+}
+
+#app canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.css3d {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ---------- HUD (screen space) ---------- */
+#hud {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+#hint {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 22px;
+  background: rgba(30, 29, 28, 0.82);
+  color: #eee;
+  font-size: 13px;
+  padding: 10px 22px;
+  border-radius: 999px;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+#hint b {
+  color: var(--orange);
+  font-weight: 600;
+}
+
+#toast {
+  position: absolute;
+  top: 26px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-12px);
+  background: var(--orange);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 12px 26px;
+  border-radius: 14px;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+#toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ---------- Spatial Panels ---------- */
+.panel {
+  background: var(--panel);
+  color: #fff;
+  border-radius: 30px;
+  padding: 44px 52px;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4);
+  user-select: none;
+  font-family: var(--font);
+}
+
+.panel h1 {
+  font-size: 42px;
+  font-weight: 600;
+  text-align: center;
+  margin: 0 0 10px;
+  line-height: 1.3;
+}
+
+.panel h1 .accent {
+  color: var(--orange);
+}
+
+.panel .subtitle {
+  text-align: center;
+  font-size: 19px;
+  opacity: 0.95;
+  margin: 14px 0 0;
+  line-height: 1.5;
+}
+
+.btn {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: 1.5px solid var(--line);
+  color: #fff;
+  font-family: var(--font);
+  font-size: 19px;
+  border-radius: 12px;
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  text-align: center;
+  line-height: 1.25;
+}
+
+.btn:hover {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.btn:active {
+  transform: scale(0.985);
+}
+
+.btn.selected {
+  border: 2.5px solid var(--orange);
+}
+
+.btn.primary {
+  background: var(--orange);
+  border-color: var(--orange);
+  font-weight: 600;
+}
+
+.btn.primary:hover {
+  background: var(--orange-soft);
+}
+
+.btn .btn-sub {
+  display: block;
+  font-size: 11px;
+  margin-top: 5px;
+  opacity: 0.9;
+}
+
+/* ---------- Startscreen ---------- */
+.start-panel {
+  width: 1060px;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+  position: relative;
+}
+
+.start-warning {
+  position: absolute;
+  top: -74px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 74px;
+  filter: drop-shadow(0 6px 16px rgba(242, 118, 46, 0.55));
+}
+
+.start-head {
+  background: var(--panel);
+  border-radius: 26px;
+  padding: 38px 46px 34px;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4);
+}
+
+.start-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.start-col {
+  background: var(--panel);
+  border-radius: 22px;
+  padding: 28px 24px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+.start-col h3 {
+  font-size: 21px;
+  font-weight: 600;
+  text-align: center;
+  margin: 0 0 22px;
+  line-height: 1.45;
+  min-height: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.start-col .btn {
+  margin-bottom: 14px;
+}
+
+.start-col .btn:last-child {
+  margin-bottom: 0;
+}
+
+.start-footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-top: 18px;
+  background: var(--panel);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+.start-footer .btn {
+  background: var(--panel-soft);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  font-size: 17px;
+}
+
+.start-footer .btn:hover {
+  background: #454240;
+}
+
+/* ---------- Modul Selection ---------- */
+.module-panel {
+  width: 1000px;
+}
+
+.module-panel h2 {
+  font-size: 30px;
+  font-weight: 600;
+  text-align: center;
+  margin: 0 0 34px;
+  line-height: 1.45;
+}
+
+.module-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 18px;
+}
+
+.module-btn {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-align: left;
+  padding: 14px 18px;
+}
+
+.module-btn .num {
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--orange);
+  border: 2px solid var(--orange);
+  border-radius: 8px;
+  width: 52px;
+  height: 52px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.module-btn .label {
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+/* ---------- PreChecklist Dialog ---------- */
+.prechecklist-panel {
+  width: 1060px;
+  text-align: center;
+}
+
+.prechecklist-panel h2 {
+  font-size: 31px;
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+
+.prechecklist-panel p {
+  font-size: 19px;
+  margin: 0 0 30px;
+  opacity: 0.95;
+}
+
+.prechecklist-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* ---------- Checkliste ---------- */
+.checklist-panel {
+  width: 1060px;
+}
+
+.kicker {
+  font-size: 19px;
+  margin: 0 0 4px;
+  opacity: 0.95;
+}
+
+.checklist-panel .title,
+.cms-checklist .title,
+.checkpoint-editor .title {
+  font-size: 58px;
+  font-weight: 700;
+  color: var(--orange);
+  margin: 0 0 34px;
+  line-height: 1.05;
+}
+
+.check-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: repeat(4, auto);
+  grid-auto-flow: column;
+  column-gap: 48px;
+  row-gap: 26px;
+  margin-bottom: 38px;
+}
+
+.check-item {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  cursor: pointer;
+}
+
+.checkbox {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  border-radius: 8px;
+  background: #3d3b39;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  font-size: 20px;
+  transition: color 0.15s;
+}
+
+.check-item.checked .checkbox {
+  color: var(--orange);
+}
+
+.check-item .check-label {
+  font-size: 20px;
+  line-height: 1.3;
+}
+
+.check-item .check-sub {
+  display: block;
+  font-size: 13px;
+  opacity: 0.8;
+  margin-top: 4px;
+}
+
+/* ---------- Check In ---------- */
+.checkin-panel {
+  width: 760px;
+  text-align: center;
+}
+
+.checkin-panel h2 {
+  font-size: 46px;
+  font-weight: 700;
+  color: var(--orange);
+  margin: 0 0 8px;
+}
+
+.checkin-panel .accent-line {
+  color: var(--orange);
+  font-size: 17px;
+  margin: 0 0 26px;
+}
+
+.checkin-panel .body-line {
+  font-size: 17px;
+  line-height: 1.5;
+  margin: 0 0 18px;
+  white-space: pre-line;
+}
+
+.checkin-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 30px;
+}
+
+.checkin-actions .btn {
+  font-size: 17px;
+}
+
+.checkin-actions .btn.wide {
+  grid-column: 1 / -1;
+}
+
+.btn.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* ---------- Timer ---------- */
+.timer-panel {
+  width: 300px;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  text-align: center;
+}
+
+.timer-title {
+  background: var(--panel);
+  border-radius: 14px;
+  color: var(--orange);
+  font-size: 30px;
+  font-weight: 700;
+  padding: 10px 0;
+  margin-bottom: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+}
+
+.timer-digits {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  background: var(--panel);
+  border-radius: 14px;
+  padding: 14px 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+}
+
+.timer-digits .digit {
+  background: #1d1c1b;
+  border-radius: 8px;
+  width: 52px;
+  height: 68px;
+  font-size: 44px;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 -2px 0 rgba(255, 255, 255, 0.06);
+}
+
+.timer-digits .colon {
+  font-size: 40px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+}
+
+/* ---------- Notifications ---------- */
+.notif-stack {
+  width: 460px;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.notif {
+  background: var(--panel);
+  border: 1.5px solid var(--orange);
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: flex;
+  gap: 14px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transform: translateX(-30px);
+  transition: opacity 0.4s, transform 0.4s;
+}
+
+.notif.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.notif .bell {
+  font-size: 26px;
+}
+
+.notif .notif-title {
+  color: var(--orange);
+  font-weight: 700;
+  font-size: 17px;
+  margin-bottom: 3px;
+}
+
+.notif .notif-text {
+  font-size: 13.5px;
+  line-height: 1.4;
+  white-space: pre-line;
+}
+
+.notif .notif-time {
+  margin-left: auto;
+  font-size: 11px;
+  opacity: 0.7;
+  white-space: nowrap;
+}
+
+/* ---------- Task Frage ---------- */
+.task-panel {
+  width: 900px;
+  text-align: center;
+  padding: 34px 40px;
+}
+
+.task-panel h3 {
+  font-size: 30px;
+  font-weight: 600;
+  margin: 0 0 26px;
+}
+
+.task-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 18px;
+}
+
+/* ---------- Konsequenz ---------- */
+.consequence-panel {
+  width: 900px;
+  text-align: center;
+}
+
+.consequence-ring {
+  width: 110px;
+  height: 110px;
+  border: 3px solid var(--yellow);
+  border-radius: 50%;
+  margin: 0 auto 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 54px;
+}
+
+.consequence-panel h2 {
+  color: var(--yellow);
+  font-size: 38px;
+  font-weight: 600;
+  margin: 0 0 16px;
+}
+
+.consequence-panel p {
+  font-size: 18px;
+  line-height: 1.5;
+  white-space: pre-line;
+  margin: 0 0 32px;
+}
+
+.consequence-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* ---------- Review ---------- */
+.review-panel {
+  width: 940px;
+  text-align: center;
+}
+
+.review-panel h2 {
+  color: var(--yellow);
+  font-size: 40px;
+  font-weight: 600;
+  margin: 0 0 16px;
+}
+
+.review-panel .review-text {
+  font-size: 19px;
+  line-height: 1.55;
+  white-space: pre-line;
+  margin: 0 0 44px;
+}
+
+.review-viz {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 44px;
+}
+
+.review-viz .viz-label {
+  font-size: 18px;
+  margin-top: 22px;
+}
+
+.arcs {
+  display: flex;
+  justify-content: center;
+  gap: 26px;
+  height: 120px;
+  align-items: center;
+}
+
+.bars {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 14px;
+  height: 120px;
+}
+
+.bars .bar {
+  width: 44px;
+  background: var(--yellow);
+  border-radius: 4px;
+}
+
+/* ---------- CMS ---------- */
+.cms-panel {
+  width: 980px;
+  padding: 40px 46px;
+}
+
+.chip {
+  display: inline-block;
+  width: auto;
+  background: var(--panel-soft);
+  border: none;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  font-size: 16px;
+  padding: 10px 22px;
+  border-radius: 12px;
+}
+
+.cms-panel h2,
+.cms-title {
+  color: var(--orange);
+  font-size: 46px;
+  font-weight: 700;
+  margin: 18px 0 26px;
+}
+
+.cms-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  background: var(--panel-soft);
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.stepper button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  padding: 12px 16px;
+  cursor: pointer;
+  font-family: var(--font);
+}
+
+.stepper button:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.stepper .stepper-value {
+  flex: 1;
+  text-align: center;
+  font-size: 18px;
+}
+
+.cms-add {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 14px;
+  text-align: left;
+  background: var(--panel-soft);
+  border: none;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  font-size: 17px;
+}
+
+.cms-add .icon {
+  font-size: 22px;
+  width: 26px;
+  text-align: center;
+}
+
+.cms-section-title {
+  color: var(--orange);
+  font-size: 27px;
+  font-weight: 700;
+  margin: 30px 0 20px;
+}
+
+.cms-panel .module-grid {
+  margin-bottom: 18px;
+}
+
+.cms-panel .module-btn .num {
+  width: 44px;
+  height: 44px;
+  font-size: 26px;
+}
+
+.cms-panel .module-btn .label {
+  font-size: 16px;
+}
+
+.cms-wide {
+  width: 100%;
+  margin-top: 16px;
+}
+
+/* ---------- CMS Checkliste (rechtes Panel) ---------- */
+.cms-checklist {
+  width: 620px;
+  position: relative;
+}
+
+.cms-checklist .back-chip,
+.checkpoint-editor .back-chip {
+  position: absolute;
+  top: 40px;
+  right: 44px;
+}
+
+.edit-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.icon-btn {
+  background: var(--panel-soft);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  width: 42px;
+  height: 42px;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  flex: 0 0 auto;
+}
+
+.icon-btn:hover {
+  background: #454240;
+}
+
+.edit-item .check-label {
+  font-size: 18px;
+  line-height: 1.3;
+  padding-top: 8px;
+}
+
+.edit-item .check-sub {
+  display: block;
+  font-size: 12px;
+  opacity: 0.8;
+  margin-top: 3px;
+}
+
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 8px 0 24px;
+}
+
+.dots span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.dots span.active {
+  background: #fff;
+}
+
+/* ---------- Checkpoint Editor ---------- */
+.checkpoint-editor {
+  width: 620px;
+  position: relative;
+}
+
+.checkpoint-label {
+  font-size: 22px;
+  margin: 0 0 18px;
+}
+
+.field {
+  background: var(--panel-soft);
+  border-radius: 14px;
+  padding: 20px 22px;
+  font-size: 18px;
+  line-height: 1.5;
+  white-space: pre-line;
+  position: relative;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
+  margin-bottom: 22px;
+  outline: none;
+}
+
+.field .pencil {
+  position: absolute;
+  right: 16px;
+  bottom: 12px;
+  opacity: 0.8;
+}
+
+.field.answer {
+  font-size: 16px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+}
+
+.field.correct {
+  border: 1.5px solid #4caf50;
+}
+
+.field.wrong {
+  border: 1.5px solid #c0392b;
+}
+
+.answer-label {
+  font-size: 14px;
+  margin: 0 0 8px;
+  opacity: 0.9;
+}
+
+.spatial-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 4px 0 24px;
+  cursor: pointer;
+}
+
+.spatial-link .checkbox {
+  width: 34px;
+  height: 34px;
+}
+
+.spatial-link.checked .checkbox {
+  color: #fff;
+}
+
+.spatial-link span {
+  font-size: 17px;
+}
+
+/* ---------- Checkpoint hinzugefügt ---------- */
+.placement-panel {
+  width: 1000px;
+  text-align: center;
+}
+
+.placement-panel h2 {
+  color: var(--orange);
+  font-size: 30px;
+  font-weight: 600;
+  margin: 0 0 20px;
+}
+
+.placement-panel p {
+  font-size: 17px;
+  line-height: 1.6;
+  white-space: pre-line;
+  margin: 0 0 30px;
+}
+
+/* ---------- Tutorial ---------- */
+.tutorial-panel {
+  width: 760px;
+}
+
+.tutorial-panel h2 {
+  color: var(--orange);
+  font-size: 38px;
+  font-weight: 700;
+  text-align: center;
+  margin: 0 0 30px;
+}
+
+.tutorial-row {
+  display: flex;
+  gap: 22px;
+  align-items: baseline;
+  margin-bottom: 18px;
+  font-size: 18px;
+}
+
+.tutorial-row b {
+  color: var(--orange);
+  flex: 0 0 190px;
+  text-align: right;
+}
+
+.tutorial-panel .btn.primary {
+  margin-top: 26px;
+}
+
+/* ---------- Interaktionspunkte (Gears) ---------- */
+.gear-hotspot {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f5a24b, #e07c1f 70%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+  transition: transform 0.15s;
+  position: relative;
+}
+
+.gear-hotspot:hover {
+  box-shadow: 0 0 0 8px rgba(242, 118, 46, 0.35), 0 10px 26px rgba(0, 0, 0, 0.35);
+  filter: brightness(1.12);
+}
+
+.gear-hotspot svg {
+  width: 54px;
+  height: 54px;
+  fill: #fff;
+}
+
+.gear-hotspot.active {
+  background: radial-gradient(circle at 35% 30%, #9ed0b3, #74b591 70%);
+}
+
+.gear-hotspot.grabbed {
+  pointer-events: none;
+  box-shadow: 0 0 0 6px rgba(242, 118, 46, 0.4), 0 10px 26px rgba(0, 0, 0, 0.35);
+}
+
+.gear-hotspot .badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #fff;
+}
+
+.gear-hotspot.ok .badge {
+  display: flex;
+  background: #3f9d4e;
+}
+
+.gear-hotspot.bad .badge {
+  display: flex;
+  background: #c0392b;
+}
+
+/* Schwebende Deko-Gears (Startscreen) */
+.gear-float {
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f5a24b, #e07c1f 70%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.25);
+}
+
+.gear-float svg {
+  fill: #fff;
+  width: 55%;
+  height: 55%;
+  animation: gearspin 14s linear infinite;
+}
+
+@keyframes gearspin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Feuer ---------- */
+.fire {
+  font-size: 130px;
+  pointer-events: none;
+}
+
+.fire-inner {
+  display: inline-block;
+  filter: drop-shadow(0 0 26px rgba(255, 120, 0, 0.7));
+  animation: flicker 0.5s infinite alternate;
+}
+
+@keyframes flicker {
+  from {
+    transform: scale(1) translateY(0);
+    opacity: 0.92;
+  }
+  to {
+    transform: scale(1.12) translateY(-7px);
+    opacity: 1;
+  }
+}
+
+/* Checkliste im Check-In (klein, mit Countdown-Badge) */
+.mini-checklist {
+  width: 560px;
+  position: relative;
+  padding: 34px 38px;
+}
+
+.mini-checklist .title {
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--orange);
+  margin: 0 0 24px;
+}
+
+.mini-checklist .check-grid {
+  grid-template-columns: 1fr;
+  row-gap: 18px;
+  margin-bottom: 0;
+}
+
+.mini-checklist .check-label {
+  font-size: 16px;
+}
+
+.mini-checklist .checkbox {
+  width: 24px;
+  height: 24px;
+}
+
+.countdown-badge {
+  position: absolute;
+  top: 26px;
+  right: 30px;
+  width: 52px;
+  height: 52px;
+  border: 2px dashed rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 600;
+}
