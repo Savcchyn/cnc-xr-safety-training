@@ -124,8 +124,8 @@ export function buildPreChecklistPanel(onNo, onYes) {
 
 /* ---------------- Checkliste (groß) ---------------- */
 
-function checklistItems(cls = '') {
-  return content.checklist.items
+function checklistItems(items, cls = '') {
+  return items
     .map(
       (item, i) => `
       <div class="check-item ${cls}" data-action="toggle" data-index="${i}">
@@ -138,14 +138,20 @@ function checklistItems(cls = '') {
     .join('')
 }
 
+function getChecklist(machineKey, moduleN) {
+  const items = content.checklists[machineKey]?.[moduleN] || content.checklists.m1[2]
+  const title = content.modules.find((m) => m.n === moduleN)?.title || ''
+  return { items, title, kicker: `Checkliste Modul ${moduleN}` }
+}
+
 export function buildChecklistPanel(onStart) {
   const c = content.checklist
-  return makePanel(
+  const panel = makePanel(
     'checklist-panel',
     `
     <p class="kicker">${c.kicker}</p>
     <h2 class="title">${c.title}</h2>
-    <div class="check-grid">${checklistItems()}</div>
+    <div class="check-grid"></div>
     <button class="btn primary" data-action="start" style="font-size:24px;padding:20px;">${c.startButton}</button>
     `,
     {
@@ -153,6 +159,16 @@ export function buildChecklistPanel(onStart) {
       toggle: (t) => t.classList.toggle('checked'),
     }
   )
+  panel.setChecklist = (machineKey, moduleN) => {
+    const { items, title, kicker } = getChecklist(machineKey, moduleN)
+    panel.el.querySelector('.kicker').textContent = kicker
+    panel.el.querySelector('.title').textContent = title
+    const grid = panel.el.querySelector('.check-grid')
+    grid.innerHTML = checklistItems(items)
+    grid.style.gridTemplateRows = `repeat(${Math.ceil(items.length / 2)}, auto)`
+  }
+  panel.setChecklist('m1', 2)
+  return panel
 }
 
 /* ---------------- Check In ---------------- */
@@ -279,11 +295,18 @@ export function buildMiniChecklist() {
     `
     <p class="kicker">${c.kicker}</p>
     <h2 class="title">${c.title}</h2>
-    <div class="countdown-badge"><span>15</span></div>
-    <div class="check-grid">${checklistItems()}</div>
+    <div class="countdown-badge"><span>10</span></div>
+    <div class="check-grid"></div>
     `,
     { toggle: (t) => t.classList.toggle('checked') }
   )
+  panel.setChecklist = (machineKey, moduleN) => {
+    const { items, title, kicker } = getChecklist(machineKey, moduleN)
+    panel.el.querySelector('.kicker').textContent = kicker
+    panel.el.querySelector('.title').textContent = title
+    panel.el.querySelector('.check-grid').innerHTML = checklistItems(items)
+  }
+  panel.setChecklist('m1', 2)
   panel.setCountdown = (n) => {
     panel.el.querySelector('.countdown-badge span').textContent = n
   }
@@ -540,6 +563,7 @@ export function buildCmsPanel(handlers) {
       c.machines[state.machine],
       c.groups[state.group]
     )
+    if (key === 'machine') handlers.machineChanged?.(state.machine)
   }
 
   return panel
@@ -549,26 +573,12 @@ export function buildCmsPanel(handlers) {
 
 export function buildCmsChecklistPanel(onEditItem, onAddCheckpoint, onSave, onDeleteItem = () => {}) {
   const c = content.cms
-  const items = content.checklist.items
-    .slice(0, 5)
-    .map(
-      (item, i) => `
-      <div class="edit-item">
-        <button class="icon-btn" data-action="delete-item" data-index="${i}">✕</button>
-        <button class="icon-btn" data-action="edit-item" data-index="${i}">✎</button>
-        <div class="check-label">${item.label}
-          ${item.sub ? `<span class="check-sub">${item.sub}</span>` : ''}
-        </div>
-      </div>`
-    )
-    .join('')
-
-  return makePanel(
+  const panel = makePanel(
     'cms-checklist',
     `
     <p class="kicker">${c.checklistKicker}</p>
     <h2 class="title">${c.checklistTitle}</h2>
-    ${items}
+    <div class="cms-check-items"></div>
     <div class="dots"><span class="active"></span><span></span><span></span></div>
     <button class="btn cms-add cms-wide" data-action="add-checkpoint"><span class="icon">+</span>${c.addCheckpoint}</button>
     <button class="btn cms-add cms-wide" data-action="save" style="margin-top:14px;"><span class="icon">💾</span>${c.saveChecklist}</button>
@@ -580,6 +590,26 @@ export function buildCmsChecklistPanel(onEditItem, onAddCheckpoint, onSave, onDe
       save: onSave,
     }
   )
+  panel.setChecklist = (machineKey, moduleN) => {
+    const { items, title, kicker } = getChecklist(machineKey, moduleN)
+    panel.el.querySelector('.kicker').textContent = kicker
+    panel.el.querySelector('.title').textContent = title
+    panel.el.querySelector('.cms-check-items').innerHTML = items
+      .slice(0, 5)
+      .map(
+        (item, i) => `
+        <div class="edit-item">
+          <button class="icon-btn" data-action="delete-item" data-index="${i}">✕</button>
+          <button class="icon-btn" data-action="edit-item" data-index="${i}">✎</button>
+          <div class="check-label">${item.label}
+            ${item.sub ? `<span class="check-sub">${item.sub}</span>` : ''}
+          </div>
+        </div>`
+      )
+      .join('')
+  }
+  panel.setChecklist('m1', 2)
+  return panel
 }
 
 /* ---------------- CMS: Checkpoint Editor ---------------- */

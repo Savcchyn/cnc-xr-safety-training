@@ -1,4 +1,7 @@
 // Alle Texte stammen aus den ShapesXR-Screenshots (1:1 übernommen, inkl. Originalschreibweise).
+// Die Routinen-Checklisten aller Maschinen stammen aus checklisten_alle_maschinen.md.
+
+const CL = (label, sub = '') => ({ label, sub })
 
 export const content = {
   start: {
@@ -98,6 +101,173 @@ export const content = {
       { label: 'Kühlschmierstoff-Zufuhr geprüft', sub: '' },
     ],
     startButton: 'Modul Starten',
+  },
+
+  // Routinen-Checklisten: 3 Maschinen × 6 Module
+  checklists: {
+    // MASCHINE 1 — CNC Portalfräse (Holzbearbeitung)
+    m1: {
+      1: [
+        CL('Schutzbrille aufgesetzt'),
+        CL('Eng anliegende Kleidung', 'keine losen Ärmel oder Bänder'),
+        CL('<b>Keine Handschuhe</b> an rotierenden Werkzeugen'),
+        CL('Lange Haare zusammengebunden'),
+        CL('Kein Schmuck, keine Uhr'),
+        CL('Gehörschutz bereit', 'offene Maschine = hoher Lärmpegel'),
+        CL('Staubmaske bei Holzbearbeitung bereit'),
+        CL('Arbeitsbereich um das Portal frei und trocken'),
+        CL('Not-Aus erreichbar und frei zugänglich'),
+        CL('Absauganlage funktionsfähig'),
+      ],
+      2: [
+        CL('Maschine im sicheren Zustand', '(Hauptantrieb aus, ggf. abgeschaltet/verriegelt)'),
+        CL('Werkzeug auf Beschädigung geprüft', 'keine Risse, kein Ausbruch an der Schneide'),
+        CL('Werkzeug korrekt und fest gespannt', 'Spannzange sauber'),
+        CL('Werkstück sicher gespannt', 'Vakuum/Klemmen — Spannkraft und Spannmittel passend'),
+        CL('Spannmittel auf festen Sitz kontrolliert'),
+        CL('Werkzeuglängen und Nullpunkte korrekt eingemessen'),
+        CL('Absaugung am Fräskopf angeschlossen'),
+      ],
+      3: [
+        CL('Programm auf Plausibilität geprüft', 'Verfahrwege, Drehzahlen, Werkzeugwechsel'),
+        CL('Testlauf im Einzelsatz- oder Simulationsmodus'),
+        CL('Vorschub-Override für ersten Durchlauf reduziert'),
+        CL('Portal-Verfahrbereich vollständig frei', 'keine Werkzeuge, keine Personen'),
+        CL('Kollisionsfreiheit visuell kontrolliert'),
+      ],
+      4: [
+        CL('Sicherheitsabstand zum fahrenden Portal halten'),
+        CL('<b>Niemals</b> in den Arbeitsbereich greifen'),
+        CL('Maschine nicht unbeaufsichtigt lassen'),
+        CL('Auf ungewöhnliche Geräusche und Vibrationen achten', 'stumpfes Werkzeug klingt anders'),
+        CL('Späne und Staub nicht während des Laufs entfernen'),
+      ],
+      5: [
+        CL('Maschine <b>vollständig stillsetzen</b>, nicht nur pausieren'),
+        CL('Stillstand von Spindel und Portal visuell bestätigt'),
+        CL('Bei Wartung: Hauptschalter aus', 'gegen Wiedereinschalten sichern'),
+        CL('Späne nur mit Haken oder Bürste entfernen', 'nie mit der Hand'),
+        CL('Messungen nur bei stehender Maschine'),
+      ],
+      6: [
+        CL('Maschine ordnungsgemäß heruntergefahren'),
+        CL('Werkzeuge entnommen und sachgerecht gelagert'),
+        CL('Tisch, Portal und Boden von Spänen und Staub gereinigt'),
+        CL('Absauganlage geleert/geprüft'),
+        CL('Auffälligkeiten dokumentiert und gemeldet'),
+      ],
+    },
+    // MASCHINE 2 — CNC-Fräsmaschine / Vertikales Bearbeitungszentrum
+    m2: {
+      1: [
+        CL('Schutzbrille aufgesetzt'),
+        CL('Eng anliegende Kleidung, keine losen Ärmel'),
+        CL('<b>Keine Handschuhe</b> an rotierenden Werkzeugen'),
+        CL('Lange Haare zusammengebunden, kein Schmuck'),
+        CL('Sicherheitsschuhe getragen'),
+        CL('Schutztüren, Sichtscheiben und Verriegelungen unbeschädigt und funktionsfähig'),
+        CL('Verriegelungen <b>nicht</b> überbrückt'),
+        CL('Not-Aus erreichbar'),
+        CL('Boden frei von Kühlschmierstoff-Pfützen', 'Rutschgefahr'),
+        CL('Kühlschmierstoff-Füllstand geprüft'),
+      ],
+      2: [
+        CL('Maschine im sicheren Zustand', 'Spindel aus, Tür verriegelt geöffnet'),
+        CL('Werkzeuge auf Beschädigung geprüft', 'Risse, Ausbrüche, Verschleiß'),
+        CL('Werkzeuge korrekt in Halter gespannt', 'Kegel und Spannzangen sauber'),
+        CL('<b>Werkzeugwechsler-Magazin</b>: Plätze korrekt belegt', 'Werkzeugnummern stimmen mit Programm überein'),
+        CL('Werkstück im Schraubstock/Spannmittel sicher gespannt', 'Spanndruck passend'),
+        CL('Spannmittel fest mit Tisch verschraubt'),
+        CL('Werkzeuglängen vermessen, Nullpunkte gesetzt'),
+        CL('Kühlschmierstoff-Düsen ausgerichtet'),
+      ],
+      3: [
+        CL('Programm auf Plausibilität geprüft', 'Verfahrwege, Werkzeugaufrufe, Drehzahlen'),
+        CL('Testlauf im Einzelsatz oder Grafiksimulation'),
+        CL('Vorschub-Override reduziert für den ersten Durchlauf'),
+        CL('Arbeitsraum leer', 'keine Werkzeuge, Lappen, Messmittel in der Kabine'),
+        CL('<b>Schutztür geschlossen und verriegelt</b>'),
+        CL('Kollisionsgefahr Werkzeugwechsler ↔ Werkstück geprüft'),
+      ],
+      4: [
+        CL('Schutztür während der Bearbeitung geschlossen halten'),
+        CL('Prozess durch Sichtscheibe beobachten, nicht öffnen'),
+        CL('Auf ungewöhnliche Geräusche, Rattern oder Vibrationen achten', '→ sofort stoppen'),
+        CL('Maschine nicht unbeaufsichtigt lassen', 'sofern nicht freigegeben'),
+        CL('<b>Automatischen Werkzeugwechsel nie manuell stören</b>'),
+      ],
+      5: [
+        CL('Zyklus stoppen und Spindelstillstand abwarten', 'bevor die Tür geöffnet wird'),
+        CL('Stillstand visuell bestätigt, nicht angenommen'),
+        CL('Bei Wartung: Hauptschalter aus', 'gegen Wiedereinschalten sichern (LOTO)'),
+        CL('Heiße Späne nur mit Haken/Bürste entfernen', 'Metallspäne sind scharf und heiß'),
+        CL('Werkstückmessung nur bei stehender Spindel'),
+        CL('Nach Eingriff: Tür schließen, erst dann Zyklus fortsetzen'),
+      ],
+      6: [
+        CL('Maschine ordnungsgemäß heruntergefahren'),
+        CL('Arbeitsraum von Spänen gereinigt', 'Haken/Bürste, Späneförderer geleert'),
+        CL('Kühlschmierstoff-Rückstände vom Boden entfernt'),
+        CL('Werkzeuge geprüft und gelagert, Magazin dokumentiert'),
+        CL('Auffälligkeiten und Störungen gemeldet'),
+      ],
+    },
+    // MASCHINE 3 — CNC-Drehmaschine / Universal-Drehzentrum
+    m3: {
+      1: [
+        CL('Schutzbrille aufgesetzt'),
+        CL('Eng anliegende Kleidung', 'rotierendes Werkstück kann Kleidung erfassen'),
+        CL('<b>Keine Handschuhe</b>', 'Einzugsgefahr am rotierenden Werkstück'),
+        CL('Lange Haare zusammengebunden, kein Schmuck, keine Ringe'),
+        CL('Sicherheitsschuhe getragen'),
+        CL('Schutztür, Sichtscheibe und Verriegelung funktionsfähig'),
+        CL('Not-Aus erreichbar'),
+        CL('Boden frei von Kühlschmierstoff und Spänen'),
+      ],
+      2: [
+        CL('Maschine im sicheren Zustand', 'Spindel aus, verriegelt'),
+        CL('<b>Futterbacken/Spannfutter</b>: Zustand geprüft', 'Backen passend zum Werkstückdurchmesser'),
+        CL('Werkstück sicher und rund laufend gespannt', 'Spanndruck passend zu Durchmesser und Drehzahl'),
+        CL('<b>Futterschlüssel abgezogen!</b>', 'Schlüssel wird beim Start zum Geschoss'),
+        CL('Bei langen Werkstücken: Reitstock/Lünette gesetzt und gesichert'),
+        CL('Stangenmaterial: Überstand hinter der Spindel gesichert/abgedeckt'),
+        CL('Drehmeißel/Wendeplatten auf Verschleiß geprüft, fest gespannt'),
+        CL('Werkzeugrevolver: Plätze korrekt belegt', 'keine Kollisionsgefahr'),
+        CL('Nullpunkte und Werkzeugkorrekturen eingemessen'),
+      ],
+      3: [
+        CL('Programm auf Plausibilität geprüft', 'Drehzahlen zum Spanndurchmesser passend!'),
+        CL('<b>Maximale Drehzahl des Spannfutters nicht überschritten</b>'),
+        CL('Testlauf im Einzelsatz oder Simulation'),
+        CL('Vorschub-Override reduziert'),
+        CL('Arbeitsraum leer, Revolver-Schwenkbereich frei'),
+        CL('Schutztür geschlossen und verriegelt'),
+      ],
+      4: [
+        CL('Schutztür geschlossen halten', 'Fliehkraft: gelöste Teile werden zu Geschossen'),
+        CL('<b>Niemals</b> bei rotierendem Werkstück in den Arbeitsraum greifen'),
+        CL('Auf Unwucht achten', 'Vibrationen oder Schlagen → sofort stoppen'),
+        CL('<b>Fließspäne niemals mit der Hand anfassen</b>', 'messerscharf, heiß'),
+        CL('Maschine nicht unbeaufsichtigt lassen'),
+        CL('Auf veränderte Schnittgeräusche achten', 'Verschleiß, Aufbauschneide'),
+      ],
+      5: [
+        CL('Spindel vollständig stillsetzen', 'Nachlauf des Futters abwarten'),
+        CL('Stillstand des Werkstücks visuell bestätigt'),
+        CL('Bei Wartung: Hauptschalter aus', 'gegen Wiedereinschalten sichern (LOTO)'),
+        CL('Späne nur mit Spänehaken entfernen', 'nie mit der Hand oder Druckluft Richtung Körper'),
+        CL('Messen am Werkstück nur bei absolutem Stillstand'),
+        CL('Nach Umspannen: Futterschlüssel-Check wiederholen'),
+      ],
+      6: [
+        CL('Maschine ordnungsgemäß heruntergefahren'),
+        CL('Arbeitsraum und Späneförderer gereinigt'),
+        CL('Spannfutter gereinigt', 'ggf. Backen entnommen und gelagert'),
+        CL('Kühlschmierstoff-Rückstände beseitigt, Füllstand geprüft'),
+        CL('Werkzeuge/Wendeplatten geprüft und dokumentiert'),
+        CL('Auffälligkeiten gemeldet'),
+      ],
+    },
   },
 
   checkin: {

@@ -91,6 +91,9 @@ export class Flow {
     this.selections = { machine: null, level: null, space: null }
     this.mode = 'space'
     this.machineKey = 'm1'
+    this.selectedModule = 2
+    this.cmsMachineIdx = 0
+    this.cmsModule = 2
     this.onboardingStep = 0
     this.timers = []
     this.hotspots = []
@@ -132,7 +135,10 @@ export class Flow {
 
     this.panels.modules = buildModulePanel(
       // Anfänger bekommen zuerst das geführte Onboarding
-      () => this.setState(this.selections.level === 0 ? 'onboarding' : 'preChecklist'),
+      (n) => {
+        this.selectedModule = n
+        this.setState(this.selections.level === 0 ? 'onboarding' : 'preChecklist')
+      },
       () => this.setState('start')
     )
 
@@ -186,7 +192,15 @@ export class Flow {
       back: () => this.setState('start'),
       prototypeOnly: () => this.toast(content.prototypeOnly),
       editNotifications: () => this.swapCmsRight('cmsNotifications'),
-      selectModule: () => this.swapCmsRight('cmsChecklist'),
+      selectModule: (n) => {
+        this.cmsModule = n
+        this.panels.cmsChecklist.setChecklist(['m1', 'm2', 'm3'][this.cmsMachineIdx], n)
+        this.swapCmsRight('cmsChecklist')
+      },
+      machineChanged: (idx) => {
+        this.cmsMachineIdx = idx
+        this.panels.cmsChecklist.setChecklist(['m1', 'm2', 'm3'][idx], this.cmsModule)
+      },
       addModule: () => this.swapCmsRight('cmsModuleEditor'),
     })
 
@@ -293,6 +307,7 @@ export class Flow {
       }
 
       case 'checklist': {
+        this.panels.checklist.setChecklist(this.machineKey, this.selectedModule)
         this.showPanel('checklist', true, V3(0, 1.75, 1.8))
         go([0, 1.65, 4.4], [0, 1.65, 0], 0.9)
         break
@@ -338,6 +353,10 @@ export class Flow {
         this.world.setMachineMode(this.mode === 'mini' ? 'mini' : 'space')
         this.showPanel('cms', true, V3(-0.95, 1.75, 1.9), 0.12)
         this.cmsRight = 'cmsChecklist'
+        this.panels.cmsChecklist.setChecklist(
+          ['m1', 'm2', 'm3'][this.cmsMachineIdx],
+          this.cmsModule
+        )
         this.showPanel('cmsChecklist', true, V3(1.15, 1.75, 1.75), -0.15)
         go([0, 1.7, 5.6], [0, 1.55, 0], 1.1)
         break
@@ -364,6 +383,7 @@ export class Flow {
         this.tasks = content.tasks.map((t) => ({ ...t, answered: null }))
         this.spawnHotspots(false)
 
+        this.panels.miniChecklist.setChecklist(this.machineKey, this.selectedModule)
         this.panels.miniChecklist.setBadgeVisible(false)
         if (this.mode === 'mini') {
           this.showPanel('miniChecklist', true, V3(-2.9, 1.9, 2.6), 0.35)
@@ -647,6 +667,7 @@ export class Flow {
     // Ganz außen links im Bogen — überlappt weder Timer noch Notifications.
     // Der Blick schwenkt zum Cluster und nach dem Ausblenden wieder zurück.
     const pos = this.mode === 'mini' ? V3(-4.15, 1.9, 2.95) : V3(-4.35, 1.85, 2.35)
+    this.panels.miniChecklist.setChecklist(this.machineKey, this.selectedModule)
     this.panels.miniChecklist.setBadgeVisible(true)
     this.showPanel('miniChecklist', true, pos, 0.42)
     this.controls.goTo(this.controls.position.clone(), this.checklistLook, 0.8)

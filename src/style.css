@@ -454,6 +454,12 @@ body.mini-grabbed #hint-mini {
   margin-top: 4px;
 }
 
+/* Sicherheitskritische Hervorhebungen aus den Checklisten */
+.check-label b {
+  color: var(--orange);
+  font-weight: 600;
+}
+
 /* ---------- Check In ---------- */
 .checkin-panel {
   width: 760px;
