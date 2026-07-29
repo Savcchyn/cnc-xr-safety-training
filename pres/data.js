@@ -92,7 +92,7 @@ export const FEATURES = [
         key: 'lernkarten',
         label: 'AR Lernkarten und Poster',
         usp: 'experience',
-        thumb: 'mini',
+        thumb: 'lernkarten',
         text: 'Karte scannen — das Miniaturmodell erscheint auf dem Tisch, das Quiz testet gezielt die Punkte, die im Routinen-Profil als Schwachstellen erkannt wurden. Training wandert in den Arbeitsalltag.',
       },
     ],
@@ -125,7 +125,7 @@ export const FEATURES = [
         key: 'arapp',
         label: 'AR App',
         usp: 'framework',
-        thumb: 'mini',
+        thumb: 'lernkarten',
         text: 'Die mobile Verlängerung des Trainings: Lernkarten scannen, Miniaturmodell platzieren, Quiz spielen — ohne Headset, ohne Installation, direkt im Pausenraum.',
       },
       {
@@ -185,7 +185,7 @@ export const UF_EXPLAIN = {
     text: 'Kein Test, kein Bestanden: Das Profil zeigt, wo die eigene Routine unter Druck nachgibt — die Grundlage für gezieltes Weiterlernen.',
   },
   lernkarten: {
-    thumb: 'mini',
+    thumb: 'lernkarten',
     title: 'AR-Lernkarten',
     text: 'Karte scannen — das Miniaturmodell erscheint auf dem Tisch, das Quiz testet gezielt die erkannten Schwachstellen. Ohne Headset, direkt im Pausenraum.',
   },
