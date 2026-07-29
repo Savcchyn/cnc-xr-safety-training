@@ -273,37 +273,65 @@ export const WORKFLOW = [
   {
     n: 1,
     title: 'ReBriefing',
-    text: 'Die Aufgabe hinterfragt: Nicht „wie machen wir ein Training besonders?", sondern „warum scheitern Sicherheitstrainings überhaupt?"',
+    points: [
+      'Briefing zerlegt, Leitfrage formuliert: Warum scheitern Sicherheitstrainings?',
+      'Notion: Hypothesen & Fragenkatalog',
+      'Output: ReBriefing-Dokument',
+    ],
   },
   {
     n: 2,
     title: 'Research',
-    text: 'Reale Gefährdungen, echte Checklisten, Unfallursachen: Der Befund — Routine und Zeitdruck schlagen Unwissen. Erfahrene sind oft gefährdeter als Anfänger.',
+    points: [
+      'Echte Checklisten, DGUV-Regeln & Unfallursachen recherchiert',
+      'Notion: Research-Dokumentation',
+      'Output: Routinen-Checklisten — 3 Maschinen × 6 Module',
+    ],
   },
   {
     n: 3,
     title: 'Ideation',
-    text: 'Mehrere Ansätze durchgespielt, ein Schwerpunkt gewählt: die Checkliste selbst zum Erlebnis machen, Fehler durch Konsequenz statt Korrektur vermitteln.',
+    points: [
+      'Ansätze in FigJam durchgespielt & bewertet',
+      'Schwerpunkt gesetzt: Konsequenz statt Korrektur',
+      'Output: Konzept-Skizze & drei USPs',
+    ],
   },
   {
     n: 4,
     title: 'Concept',
-    text: 'Aus der Idee ein System: Quest-Module, Konsequenz-Mechanik, Zeitdruck-Modus, drei Spatial Modes, Onboarding für Anfänger, Autoren-Layer für den Betrieb.',
+    points: [
+      'System definiert: Quest-Module, Zeitdruck, Spatial Modes',
+      'Figma: Userflow & Wireframes',
+      'Output: Userflow-Diagramm & Feature-Set',
+    ],
   },
   {
     n: 5,
     title: 'Design',
-    text: 'Jede Entscheidung folgt der Kernidee: Hand Tracking, weil das Training von Händen handelt. Eine Checkliste, die verschwindet. Sound als Sicherheitsinformation.',
+    points: [
+      'Figma: Neumorphism-UI & Screendesigns',
+      'Magnific: Key Visuals & Maschinen-Renderings',
+      'Output: Design-System in Orange & Charcoal',
+    ],
   },
   {
     n: 6,
     title: 'Prototyping',
-    text: 'Früh und räumlich gebaut: ShapesXR für die Spatial-Logik, ein begehbarer Web-3D-Prototyp für Ablauf, Interaktion und Konsequenz — entwickelt mit Creative Vibe Coding.',
+    points: [
+      'ShapesXR: Spatial Draft im echten Maßstab',
+      'Claude Code: Web-3D-Prototyp (Three.js) & AR-Klick-Dummy',
+      'Output: begehbare Demo + AR App',
+    ],
   },
   {
     n: 7,
     title: 'Presentation',
-    text: 'Eine Idee ist so stark wie ihre Vermittlung. Diese Präsentation ist der letzte Schritt des Prozesses — und der Beweis, dass er funktioniert.',
+    points: [
+      'Präsentations-App in derselben Codebase gebaut',
+      'GitHub → Vercel: jede Iteration sofort live',
+      'Output: dieser Case — eine URL für alles',
+    ],
   },
 ]
 

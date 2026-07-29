@@ -243,7 +243,8 @@ const wfRow = document.querySelector('.workflow-row')
 WORKFLOW.forEach((station, i) => {
   const card = document.createElement('div')
   card.className = 'wf-card'
-  card.innerHTML = `<span class="wf-num">${station.n}</span><h3>${station.title}</h3><p>${station.text}</p>`
+  card.innerHTML = `<span class="wf-num">${station.n}</span><h3>${station.title}</h3>
+    <ul class="wf-points">${station.points.map((p) => `<li>${p}</li>`).join('')}</ul>`
   wfRow.appendChild(card)
   if (i < WORKFLOW.length - 1) {
     const sep = document.createElement('span')

@@ -640,7 +640,7 @@ body {
 .demo-intro {
   font-size: clamp(13px, 1.15vw, 17px);
   line-height: 1.5;
-  max-width: 900px;
+  max-width: min(1100px, 60vw);
   margin: -14px 0 0;
   opacity: 0.92;
 }
@@ -655,7 +655,7 @@ body {
 
 .demo-frame {
   position: absolute;
-  top: 185px;
+  top: 235px;
   left: 64px;
   right: 64px;
   bottom: 90px;
@@ -706,11 +706,12 @@ body {
   margin-top: 20px;
 }
 
+/* Phone zentral im Weißraum zwischen Copy und rechtem Rand */
 .phone-mock {
   position: absolute;
   top: 50%;
-  left: 69%;
-  transform: translateY(-50%);
+  left: 68%;
+  transform: translate(-50%, -50%);
   height: min(82vh, 840px);
   aspect-ratio: 1034 / 1952;
   filter: drop-shadow(0 40px 90px rgba(0, 0, 0, 0.55));
@@ -729,14 +730,18 @@ body {
 }
 
 #arapp .phone-mock {
-  transform: translateY(calc(-50% + 40px));
+  transform: translate(-50%, calc(-50% + 40px));
   transition-delay: 0.55s;
 }
 
-#arapp.active .arapp-copy,
-#arapp.active .phone-mock {
+#arapp.active .arapp-copy {
   opacity: 1;
   transform: translateY(-50%);
+}
+
+#arapp.active .phone-mock {
+  opacity: 1;
+  transform: translate(-50%, -50%);
 }
 
 .phone-frame {
@@ -817,6 +822,32 @@ body {
   line-height: 1.45;
   margin: 0;
   opacity: 0.92;
+}
+
+.wf-points {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  text-align: left;
+}
+
+.wf-points li {
+  font-size: clamp(10.5px, 0.88vw, 13px);
+  line-height: 1.4;
+  opacity: 0.95;
+  padding-left: 14px;
+  position: relative;
+  font-weight: 400;
+}
+
+.wf-points li::before {
+  content: '·';
+  position: absolute;
+  left: 0;
+  font-weight: 700;
 }
 
 .wf-sep {
