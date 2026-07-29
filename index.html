@@ -70,18 +70,134 @@
       <section class="slide slide-dark" id="userflow">
         <h2 class="slide-title">Der Userflow</h2>
         <p class="flow-intro"></p>
-        <div class="userflow-layout">
-          <div class="flow-map" aria-label="Userflow Gesamtdarstellung"></div>
-          <aside class="flow-close">
-            <div class="flow-close-img"><img alt="" /></div>
-            <h3 class="flow-step-title"></h3>
-            <p class="flow-step-text"></p>
-            <div class="flow-nav">
-              <button class="glass flow-prev" aria-label="Vorherige Station">‹</button>
-              <span class="flow-count"></span>
-              <button class="glass flow-next" aria-label="Nächste Station">›</button>
+        <div class="uf-head">
+          <h3 class="uf-title"></h3>
+          <div class="uf-nav">
+            <button class="glass uf-prev" aria-label="Vorherige Ansicht">‹</button>
+            <span class="uf-count"></span>
+            <button class="glass uf-next" aria-label="Nächste Ansicht">›</button>
+          </div>
+        </div>
+        <div class="uf-stage">
+          <!-- 1 · Gesamtübersicht -->
+          <div class="uf-slide" data-title="Gesamtübersicht">
+            <div class="uf-overview">
+              <div class="uf-col">
+                <span class="uf-phase">Start</span>
+                <button class="ufn" data-key="headset">Headset auf<small>MR im Betrieb</small></button>
+              </div>
+              <span class="uf-arrow">→</span>
+              <div class="uf-col">
+                <span class="uf-phase">Einstieg</span>
+                <button class="ufn" data-key="setup">Willkommens-Setup<small>Maschine · Erfahrung · Spatial Mode</small></button>
+                <div class="uf-branch">
+                  <button class="ufn g" data-key="onboarding">Onboarding<small>neue Benutzer</small></button>
+                  <button class="ufn o" data-key="direkt">Direktstart<small>Erfahren / Experte</small></button>
+                </div>
+              </div>
+              <span class="uf-arrow">→</span>
+              <div class="uf-col">
+                <span class="uf-phase">Training</span>
+                <button class="ufn big" data-key="quest">Quest-Module 1–6<small>Routinen-Schleife</small></button>
+                <div class="uf-branch">
+                  <button class="ufn a" data-key="zeitdruck">Zeitdruck<small>zufälliges Ereignis</small></button>
+                  <button class="ufn r" data-key="konsequenz">Konsequenz<small>bei Fehlern ⟲</small></button>
+                </div>
+              </div>
+              <span class="uf-arrow">→</span>
+              <div class="uf-col">
+                <span class="uf-phase">Abschluss</span>
+                <button class="ufn t" data-key="profil">Routinen-Profil<small>Schwachstellen sichtbar</small></button>
+                <span class="uf-arrow down">↓</span>
+                <button class="ufn t" data-key="lernkarten">AR-Lernkarten<small>Quiz im Alltag</small></button>
+              </div>
             </div>
-          </aside>
+            <button class="ufn dash uf-dashrow" data-key="dashboard">
+              Content Dashboard — betriebsseitig
+              <small>Checklisten pflegen → Checkpoints verknüpfen → Zeitdruck-Nachrichten → Simulation anfragen</small>
+            </button>
+          </div>
+
+          <!-- 2 · Einstieg & Onboarding -->
+          <div class="uf-slide" data-title="Einstieg &amp; Onboarding">
+            <div class="uf-row">
+              <button class="ufn" data-key="setup">Willkommens-Setup<small>3 Entscheidungen: Maschine · Erfahrung · Raum</small></button>
+              <span class="uf-arrow">→</span>
+              <button class="ufn" data-key="erfahrungsstand">Erfahrungsstand?<small>die Weiche</small></button>
+            </div>
+            <div class="uf-path">
+              <span class="uf-pathlabel g">Anfänger</span>
+              <button class="ufn g" data-key="willkommen">Willkommen</button>
+              <span class="uf-arrow">→</span>
+              <button class="ufn g" data-key="gesten">Gesten-Tutorial</button>
+              <span class="uf-arrow">→</span>
+              <button class="ufn g" data-key="kennenlernen">Maschine kennenlernen<small>Gefahrenzonen</small></button>
+              <span class="uf-arrow">→</span>
+              <button class="ufn g" data-key="uebung">Übungsmodul<small>ohne Konsequenz</small></button>
+              <span class="uf-arrow">→</span>
+              <button class="ufn a" data-key="vorgeschmack">Vorgeschmack Konsequenz<small>Scharnier-Moment</small></button>
+            </div>
+            <div class="uf-path">
+              <span class="uf-pathlabel o">Erfahren / Experte</span>
+              <button class="ufn o" data-key="direkt">Direkt zur Modulauswahl</button>
+            </div>
+            <div class="uf-row">
+              <span class="uf-arrow">↳</span>
+              <button class="ufn big o" data-key="trainingein">Ins Training</button>
+            </div>
+            <p class="uf-caption">„Ein System, zwei Einstiege."</p>
+          </div>
+
+          <!-- 3 · Quest-Modul-Schleife -->
+          <div class="uf-slide" data-title="Quest-Modul-Schleife">
+            <div class="uf-row">
+              <button class="ufn" data-key="modulauswahl">Modulauswahl<small>6 Module · „Rüsten" aktiv</small></button>
+              <span class="uf-arrow">→</span>
+              <button class="ufn" data-key="checkfrage">Checklisten-Frage<small>„Letzter Blick?" · 3× Check-in</small></button>
+              <span class="uf-arrow">→</span>
+              <button class="ufn" data-key="checkin">Check-In<small>Interaktionspunkte finden</small></button>
+              <span class="uf-arrow">→</span>
+              <button class="ufn" data-key="panels">Entscheidungs-Panels<small>„Was gibt es hier zu tun?"</small></button>
+              <span class="uf-arrow">→</span>
+              <button class="ufn" data-key="auswertung">Auswertung<small>Alle Punkte erfüllt?</small></button>
+            </div>
+            <div class="uf-row">
+              <button class="ufn a side" data-key="zeitdruck">⌁ Zeitdruck-Notification<small>dockt seitlich an · Timer läuft</small></button>
+            </div>
+            <div class="uf-row">
+              <span class="uf-pathlabel r">nein</span>
+              <button class="ufn r" data-key="konsequenz">Konsequenz-Simulation<small>„3 von 5 übersprungen!" · ⟲ Modul wiederholen</small></button>
+              <span class="uf-pathlabel g">ja</span>
+              <button class="ufn g" data-key="naechstes">Nächstes Modul<small>bis alle 6 abgeschlossen</small></button>
+            </div>
+            <p class="uf-caption">„Das System korrigiert nicht. Es merkt sich — und zeigt die Folge."</p>
+          </div>
+
+          <!-- 4 · Abschluss & Verlängerung -->
+          <div class="uf-slide" data-title="Abschluss &amp; Verlängerung">
+            <div class="uf-row">
+              <button class="ufn t" data-key="profil">Routinen-Profil<small>„Kein Test. Ein Spiegel."</small></button>
+              <span class="uf-arrow">→</span>
+              <button class="ufn t" data-key="lernkarten">AR-Lernkarten<small>Scannen · Miniatur · Quiz</small></button>
+              <span class="uf-arrow">⤺</span>
+              <button class="ufn" data-key="wiederholen">Training wiederholen</button>
+            </div>
+            <button class="ufn dash uf-dashrow" data-key="dashboard">
+              Content Dashboard
+              <small>Der Betrieb dokumentiert neue Routinefehler und aktualisiert die Module</small>
+            </button>
+            <p class="uf-caption">„Das Training schreibt sich weiter."</p>
+          </div>
+        </div>
+
+        <!-- Zoom-Overlay: Klick auf einen State -->
+        <div class="uf-zoom">
+          <div class="uf-zoom-card">
+            <div class="uf-zoom-img"><img alt="" /></div>
+            <h4></h4>
+            <p></p>
+            <span class="uf-zoom-hint">Klicken zum Schließen</span>
+          </div>
         </div>
       </section>
 

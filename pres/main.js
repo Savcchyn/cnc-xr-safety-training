@@ -1,7 +1,7 @@
 import {
   USPS,
   FEATURES,
-  USERFLOW,
+  UF_EXPLAIN,
   WORKFLOW,
   SHAPESXR_URL,
   PRODUKT_INTRO,
@@ -52,7 +52,7 @@ function goTo(index) {
    ein; ausgewählte Container staggern ihre Kinder einzeln. Elemente mit
    eigenem Transform (z.B. zentrierte Absolute) bleiben unangetastet. */
 function prepAnimations() {
-  const expand = ['.start-columns', '.brief', '.feature-grid', '.workflow-row', '.flow-map']
+  const expand = ['.start-columns', '.brief', '.feature-grid', '.workflow-row']
   slides.forEach((slide) => {
     const list = []
     for (const el of slide.children) {
@@ -60,7 +60,8 @@ function prepAnimations() {
       else list.push(el)
     }
     list.forEach((el, i) => {
-      if (getComputedStyle(el).transform !== 'none') return
+      // Overlays und selbst-transformierte Elemente nicht staggern
+      if (el.matches('.uf-zoom') || getComputedStyle(el).transform !== 'none') return
       el.classList.add('anim')
       el.style.setProperty('--d', `${0.3 + i * 0.07}s`)
     })
@@ -153,49 +154,41 @@ function selectFeature(item, block) {
   detailText.innerHTML = `<b>${item.label}.</b> ${item.text}`
 }
 
-/* ---------------- Der Userflow (Gesamtdiagramm + Close-up) ---------------- */
+/* ---------------- Der Userflow (Carousel + Zoom) ---------------- */
 
 document.querySelector('.flow-intro').textContent = USERFLOW_INTRO
 
-let flowIndex = 0
-const flowMap = document.querySelector('.flow-map')
-const flowImg = document.querySelector('.flow-close-img img')
-const flowTitle = document.querySelector('.flow-step-title')
-const flowText = document.querySelector('.flow-step-text')
-const flowCount = document.querySelector('.flow-count')
+const ufSlides = [...document.querySelectorAll('.uf-slide')]
+let ufIndex = 0
 
-USERFLOW.forEach((station, i) => {
-  const node = document.createElement('button')
-  node.className = 'flow-node'
-  node.style.gridColumn = station.col
-  node.style.gridRow = station.row
-  const marks = (station.marks || [])
-    .map((m) => `<span class="mark ${m}">${{ right: '→', up: '↑', down: '↓' }[m]}</span>`)
-    .join('')
-  node.innerHTML = `
-    <span class="nlabel">${station.title}</span>
-    <span class="nimg"><img src="/thumbs/${station.thumb}.png" alt="" /></span>
-    ${marks}`
-  node.addEventListener('click', () => setFlowStep(i))
-  flowMap.appendChild(node)
-})
-
-function setFlowStep(i) {
-  flowIndex = (i + USERFLOW.length) % USERFLOW.length
-  const station = USERFLOW[flowIndex]
-  flowImg.src = `/thumbs/${station.thumb}.png`
-  flowImg.alt = station.title
-  flowTitle.textContent = station.title
-  flowText.textContent = station.text
-  flowCount.textContent = `${flowIndex + 1} / ${USERFLOW.length}`
-  flowMap.querySelectorAll('.flow-node').forEach((n, idx) => {
-    n.classList.toggle('active', idx === flowIndex)
-  })
+function ufGo(i) {
+  ufIndex = (i + ufSlides.length) % ufSlides.length
+  ufSlides.forEach((s, idx) => s.classList.toggle('active', idx === ufIndex))
+  document.querySelector('.uf-title').textContent = ufSlides[ufIndex].dataset.title
+  document.querySelector('.uf-count').textContent = `${ufIndex + 1} / ${ufSlides.length}`
 }
 
-document.querySelector('.flow-prev').addEventListener('click', () => setFlowStep(flowIndex - 1))
-document.querySelector('.flow-next').addEventListener('click', () => setFlowStep(flowIndex + 1))
-setFlowStep(0)
+document.querySelector('.uf-prev').addEventListener('click', () => ufGo(ufIndex - 1))
+document.querySelector('.uf-next').addEventListener('click', () => ufGo(ufIndex + 1))
+ufGo(0)
+
+// Klick auf einen State: vergrößern + Erklärtext im Zoom-Overlay
+const ufZoom = document.querySelector('.uf-zoom')
+document.querySelectorAll('.ufn').forEach((node) => {
+  node.addEventListener('click', () => {
+    const info = UF_EXPLAIN[node.dataset.key]
+    if (!info) return
+    ufZoom.querySelector('h4').textContent = info.title
+    ufZoom.querySelector('p').textContent = info.text
+    const imgWrap = ufZoom.querySelector('.uf-zoom-img')
+    imgWrap.style.display = info.thumb ? 'block' : 'none'
+    if (info.thumb) imgWrap.querySelector('img').src = `/thumbs/${info.thumb}.png`
+    ufZoom.querySelector('.uf-zoom-card').style.borderColor =
+      getComputedStyle(node).borderColor
+    ufZoom.classList.add('open')
+  })
+})
+ufZoom.addEventListener('click', () => ufZoom.classList.remove('open'))
 
 /* ---------------- Web Demo (iframe lazy) ---------------- */
 

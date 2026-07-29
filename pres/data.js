@@ -142,143 +142,129 @@ export const FEATURES = [
 export const USERFLOW_INTRO =
   'Ein System, zwei Einstiege: Neue Benutzer durchlaufen ein geführtes Onboarding — Gesten üben, Maschine kennenlernen, gefahrlos trainieren. Erfahrene starten direkt. Danach führt derselbe Weg durch die Quest-Module: Aufgabe, Entscheidung, Auswertung — und bei übersprungenen Schritten die Konsequenz, bevor es weitergeht.'
 
-// Gesamtdiagramm nach Vorlage: 7 Spalten × 3 Reihen.
-// Reihe 1 = Hauptpfad, Spalte 7 = Ergebnis-Stapel, Reihe 2/3 = Zweige.
-// marks: 'right' →, 'up' ↑ (Zweig nach oben), 'down' ↓ (Stapel-Fluss).
-export const USERFLOW = [
-  {
-    key: 'start',
-    title: 'Startscreen',
+// Erklärtexte für die klickbaren Userflow-Nodes (Zoom-Overlay)
+export const UF_EXPLAIN = {
+  headset: {
     thumb: 'start',
-    col: 1,
-    row: 1,
-    marks: ['right'],
-    text: 'Der Einstieg: warmer Glow, schwebende Zahnräder — und drei Fragen vor dem Training.',
+    title: 'Headset auf',
+    text: 'Die MR-Brille kommt direkt im Betrieb auf — das Training beginnt an oder neben der echten Maschine, nicht im Schulungsraum.',
   },
-  {
-    key: 'selection',
-    title: 'Trainings Selections',
+  setup: {
     thumb: 'start',
-    col: 2,
-    row: 1,
-    marks: ['right'],
-    text: 'Drei Entscheidungen, ein Einstieg: Maschine, Erfahrungsstand und Raum-Modus.',
+    title: 'Willkommens-Setup',
+    text: 'Drei Entscheidungen, ein Einstieg: Maschine, Erfahrungsstand und Spatial Mode. Das System passt Umfang und Unterstützung automatisch an.',
   },
-  {
-    key: 'module',
-    title: 'Modul Selections',
-    thumb: 'module',
-    col: 3,
-    row: 1,
-    marks: ['right'],
-    text: 'Sechs Routinen-Module der gewählten Maschine — der User startet dort, wo seine Routine trainiert werden soll.',
-  },
-  {
-    key: 'precheck',
-    title: 'PreChecklist View',
-    thumb: 'precheck',
-    col: 4,
-    row: 1,
-    marks: ['right'],
-    text: 'Letzter Blick in die Checkliste? Im Training bleibt sie bewusst knapp: dreimal einblendbar, je zehn Sekunden.',
-  },
-  {
-    key: 'training',
-    title: 'Space Simulation Mode',
-    thumb: 'training',
-    col: 5,
-    row: 1,
-    marks: ['right'],
-    text: 'Check In: Interaktionspunkte an der Maschine finden, Timer läuft mit, die UI billboardet zum User.',
-  },
-  {
-    key: 'opentask',
-    title: 'Open Modul Task',
-    thumb: 'quiz',
-    col: 6,
-    row: 1,
-    marks: ['right'],
-    text: 'Interaktionspunkt antippen — „Was gibt es hier zu tun?" erscheint direkt an der Maschine.',
-  },
-  {
-    key: 'tasksim',
-    title: 'Task Simulation',
+  onboarding: {
     thumb: 'onboarding',
-    col: 7,
-    row: 1,
-    text: 'Die virtuelle Hand führt die Entscheidung aus — der Task Point färbt sich.',
+    title: 'Onboarding (Anfänger)',
+    text: 'Neue Benutzer üben Gesten, lernen die Maschine mit ihren Gefahrenzonen kennen und trainieren zunächst ohne Konsequenz — der geschützte grüne Pfad.',
   },
-  {
-    key: 'smallstart',
-    title: 'Small Space Start',
-    thumb: 'spatial',
-    col: 2,
-    row: 2,
-    marks: ['up', 'right'],
-    text: 'Gleicher Einstieg auf kleinem Raum — die Auswahl schwebt über dem Miniaturmodell.',
+  direkt: {
+    thumb: 'module',
+    title: 'Direktstart',
+    text: 'Erfahrene und Experten überspringen das Onboarding und starten direkt in der Modulauswahl.',
   },
-  {
-    key: 'mini',
-    title: 'Small Space Mode',
-    thumb: 'mini',
-    col: 4,
-    row: 2,
-    text: 'Das Miniaturmodell: greifen, positionieren, skalieren, drehen — dasselbe Training auf der Tischplatte.',
+  quest: {
+    thumb: 'module',
+    title: 'Quest-Module 1–6',
+    text: 'Sechs Module entlang der echten Sicherheitscheckliste, als Schleife: Aufgabe, Entscheidung, Auswertung — Modul für Modul, bis die Routine sitzt.',
   },
-  {
-    key: 'zeitdruck',
-    title: 'Time Up Notification',
+  zeitdruck: {
     thumb: 'zeitdruck',
-    col: 6,
-    row: 2,
-    marks: ['up'],
-    text: 'Ab Sekunde zehn poppen die Nachrichten auf: Endmontage wartet, der Kollege drängelt, gleich fährt die Bahn.',
+    title: 'Zeitdruck-Notification',
+    text: 'Mitten im Modul erscheint unangekündigt eine Nachricht mit laufendem Timer — der Impuls, Schritte zu überspringen, wird selbst spürbar. Ein seitliches Ereignis, kein Schritt im Pfad.',
   },
-  {
-    key: 'konsequenz',
-    title: 'Konsequenz Simulation',
+  konsequenz: {
     thumb: 'konsequenz',
-    col: 7,
-    row: 2,
-    marks: ['down'],
-    text: 'Übersprungene Schritte werden ausgewertet — eine mögliche Folge wird simuliert: Feuer, Wasser oder Splitterflug.',
+    title: 'Konsequenz-Simulation',
+    text: 'Wird ein Schritt übersprungen, sagt das System nichts. Am Modulende zeigt die Simulation die mögliche Folge — Feuer, Leckage oder Splitterflug. Danach: Modul wiederholen.',
   },
-  {
-    key: 'cms',
-    title: 'Trainings-CMS',
-    thumb: 'cms',
-    col: 2,
-    row: 3,
-    marks: ['up', 'right'],
-    text: 'Content Dashboard im Raum: Checklisten pflegen, Zeitdruck-Nachrichten schreiben.',
-  },
-  {
-    key: 'contentedit',
-    title: 'Content Edit',
-    thumb: 'cms',
-    col: 3,
-    row: 3,
-    text: 'Checkpoints bearbeiten, Antworten setzen, Spatial Tasks am Modell platzieren.',
-  },
-  {
-    key: 'checklisten',
-    title: 'Checklist View',
-    thumb: 'checklisten',
-    col: 5,
-    row: 3,
-    marks: ['up'],
-    text: 'Die Routinen-Checkliste des Moduls — maschinenspezifisch, mit hervorgehobenen Sicherheits-Keywords.',
-  },
-  {
-    key: 'review',
-    title: 'Modul Review',
+  profil: {
     thumb: 'review',
-    col: 7,
-    row: 3,
-    marks: ['down'],
-    text: 'Kein Test, kein Ergebnis: das Routinen-Profil — und der Weg zurück zum Start.',
+    title: 'Routinen-Profil',
+    text: 'Kein Test, kein Bestanden: Das Profil zeigt, wo die eigene Routine unter Druck nachgibt — die Grundlage für gezieltes Weiterlernen.',
   },
-]
+  lernkarten: {
+    thumb: 'mini',
+    title: 'AR-Lernkarten',
+    text: 'Karte scannen — das Miniaturmodell erscheint auf dem Tisch, das Quiz testet gezielt die erkannten Schwachstellen. Ohne Headset, direkt im Pausenraum.',
+  },
+  dashboard: {
+    thumb: 'cms',
+    title: 'Content Dashboard',
+    text: 'Die Parallel-Ebene des Betriebs: Checklisten pflegen, Checkpoints mit Spatial Tasks verknüpfen, Zeitdruck-Nachrichten schreiben, Konsequenz-Simulationen anfragen.',
+  },
+  erfahrungsstand: {
+    thumb: 'start',
+    title: 'Erfahrungsstand?',
+    text: 'Die einzige Weiche im System: Anfänger nehmen den grünen Onboarding-Pfad, Erfahrene den direkten Weg — beide führen ins selbe Training.',
+  },
+  willkommen: {
+    thumb: 'start',
+    title: 'Willkommen',
+    text: 'Ankommen im Raum: Der warme Glow, die schwebenden Zahnräder — das Training stellt sich vor, bevor es fordert.',
+  },
+  gesten: {
+    thumb: 'onboarding',
+    title: 'Gesten-Tutorial',
+    text: 'Greifen, zeigen, platzieren — die Hand-Tracking-Grundlagen werden gefahrlos geübt, bevor die Maschine ins Spiel kommt.',
+  },
+  kennenlernen: {
+    thumb: 'training',
+    title: 'Maschine kennenlernen',
+    text: 'Die Maschine mit ihren Gefahrenzonen erkunden — noch ohne Aufgabe, ohne Timer, ohne Konsequenz.',
+  },
+  uebung: {
+    thumb: 'quiz',
+    title: 'Übungsmodul',
+    text: 'Ein komplettes Modul im Schutzraum: Fehler haben hier noch keine Folge — die Routine darf wachsen.',
+  },
+  vorgeschmack: {
+    thumb: 'konsequenz',
+    title: 'Vorgeschmack Konsequenz',
+    text: 'Der Scharnier-Moment: eine kontrollierte Kostprobe der Konsequenz-Simulation. Ab jetzt weiß der Anfänger, warum jeder Schritt zählt.',
+  },
+  trainingein: {
+    thumb: 'module',
+    title: 'Ins Training',
+    text: 'Beide Pfade münden hier: die Quest-Module der Routinen-Checkliste — für alle dieselben, mit angepasster Unterstützung.',
+  },
+  modulauswahl: {
+    thumb: 'module',
+    title: 'Modulauswahl',
+    text: 'Sechs Module entlang der Routinen-Checkliste — von „Vor Arbeitsbeginn" bis „Nach Arbeitsende". Modul 2 „Rüsten" ist das aktive Beispiel.',
+  },
+  checkfrage: {
+    thumb: 'precheck',
+    title: 'Checklisten-Frage',
+    text: '„Letzter Blick in die Checkliste?" — dreimal pro Training einblendbar, je zehn Sekunden. Dann muss die Routine aus dem Gedächtnis kommen.',
+  },
+  checkin: {
+    thumb: 'training',
+    title: 'Check-In',
+    text: 'Interaktionspunkte an der Maschine finden — keine Führung, keine Nummerierung. Wie am echten Arbeitsplatz zählt der eigene Blick.',
+  },
+  panels: {
+    thumb: 'quiz',
+    title: 'Entscheidungs-Panels',
+    text: '„Was gibt es hier zu tun?" — die falsche Option sieht oft harmlos aus. Das System bewertet nicht sofort. Es merkt sich.',
+  },
+  auswertung: {
+    thumb: 'konsequenz',
+    title: 'Auswertung',
+    text: 'Alle Punkte erfüllt? Der Moment der Wahrheit am Modulende — hier entscheidet sich, ob die Konsequenz folgt.',
+  },
+  naechstes: {
+    thumb: 'module',
+    title: 'Nächstes Modul',
+    text: 'Routine bestätigt — weiter zum nächsten Modul, bis alle sechs abgeschlossen sind.',
+  },
+  wiederholen: {
+    thumb: 'training',
+    title: 'Training wiederholen',
+    text: 'Der Kreis schließt sich: Das Training ist jederzeit wiederholbar — mit dem Wissen aus dem eigenen Routinen-Profil.',
+  },
+}
 
 export const WORKFLOW_INTRO =
   'Von der Aufgabe zur Experience in sieben Schritten — so bin ich als XR-Designerin und Entwicklerin an die Probeaufgabe herangegangen.'
