@@ -76,6 +76,30 @@ window.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowLeft') goTo(current - 1)
 })
 
+/* Swipe-Navigation für Touch-Geräte (horizontal, klar dominant) */
+let touchStart = null
+window.addEventListener(
+  'touchstart',
+  (e) => {
+    if (e.touches.length !== 1) return
+    touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+  },
+  { passive: true }
+)
+window.addEventListener(
+  'touchend',
+  (e) => {
+    if (!touchStart) return
+    const dx = e.changedTouches[0].clientX - touchStart.x
+    const dy = e.changedTouches[0].clientY - touchStart.y
+    touchStart = null
+    if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      goTo(dx < 0 ? current + 1 : current - 1)
+    }
+  },
+  { passive: true }
+)
+
 /* Kapitel-Hub auf dem Startscreen */
 const hub = document.querySelector('.hub')
 slides.slice(1).forEach((s) => {
