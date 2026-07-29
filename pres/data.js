@@ -298,12 +298,12 @@ export const WORKFLOW = [
   {
     n: 6,
     title: 'Prototyping',
-    points: ['Spatial Draft räumlich', 'Iterative Sprints', 'Inkremente live testbar'],
+    points: ['Spatial Draft räumlich', 'Iterativ entwickelt', 'Inkremente live testbar'],
   },
   {
     n: 7,
     title: 'Presentation',
-    points: ['Sprint Review live', 'Testen statt behaupten', 'Retrospektive sichtbar'],
+    points: ['Review als Live-Demo', 'Testen statt behaupten', 'Retrospektive sichtbar'],
   },
 ]
 
