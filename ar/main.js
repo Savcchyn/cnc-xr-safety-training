@@ -38,6 +38,7 @@ function go(id, push = true) {
   const current = $$('.screen').find((s) => s.classList.contains('active'))?.id.slice(2)
   if (push && current && current !== id) app.stack.push(current)
   if (current === 'viewer' && id !== 'viewer') exitViewer()
+  if (current === 'duell' && id !== 'duell') clearDuellTimers()
   show(id)
   // zurück-Chip nur zeigen, wenn es ein Zurück gibt
   $$('.screen.active > [data-back]').forEach(
@@ -60,7 +61,11 @@ $$('[data-back]').forEach((b) =>
 $$('[data-machine]').forEach((b) =>
   b.addEventListener('click', () => {
     app.machine = b.dataset.machine
-    go('level')
+    // Training braucht zusätzlich den Erfahrungsstand; AR Quiz geht
+    // direkt zur Kamera, Checklisten zur Modul-Auswahl
+    if (app.mode === 'training') go('level')
+    else if (app.mode === 'arquiz') go('kamera')
+    else go('module')
   })
 )
 
@@ -588,8 +593,42 @@ function duellOutro(scenario) {
   )
 }
 
-/* ---------------- Start ---------------- */
+/* ---------------- Splash & Start ---------------- */
 
-// Einstieg ist das Hauptmenü; Maschinen- und Levelauswahl
+// Schwebende Zahnrad-Bubbles auf dem Splashscreen
+function spawnSplashGears() {
+  const wrap = $('.splash-gears')
+  const rng = (a, b) => a + Math.random() * (b - a)
+  for (let i = 0; i < 9; i++) {
+    const g = document.createElement('div')
+    g.className = 'sp-gear'
+    const size = rng(24, 62)
+    g.style.width = `${size}px`
+    g.style.height = `${size}px`
+    // Ränder bevorzugen, damit Titel und Button frei bleiben
+    const edge = Math.random() < 0.5
+    g.style.left = edge ? `${rng(3, 20)}%` : `${rng(72, 90)}%`
+    g.style.top = `${rng(5, 88)}%`
+    g.style.animationDuration = `${rng(4.5, 8)}s`
+    g.style.animationDelay = `${rng(0, 3)}s`
+    g.innerHTML = GEAR_SVG
+    wrap.appendChild(g)
+  }
+}
+
+// Fake-Statusbar zeigt die echte Uhrzeit
+function tickClock() {
+  const now = new Date()
+  $('.sb-time').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(
+    now.getMinutes()
+  ).padStart(2, '0')}`
+}
+tickClock()
+setInterval(tickClock, 30000)
+
+$('.splash-start').addEventListener('click', () => go('home'))
+
+spawnSplashGears()
+// Einstieg über den Splashscreen; Maschinen- und Levelauswahl
 // liegen im Trainingssimulations-Pfad.
-go('home', false)
+go('splash', false)

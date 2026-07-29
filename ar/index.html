@@ -14,6 +14,34 @@
       <!-- Fake Status Bar (Klick-Dummy) -->
       <div class="statusbar"><span class="sb-time">19:51</span><span class="sb-signal">▮▮▮</span></div>
 
+      <!-- Splash / Start -->
+      <section class="screen" id="s-splash">
+        <div class="splash-bg"><div class="blob b1"></div><div class="blob b2"></div></div>
+        <div class="splash-gears"></div>
+        <div class="splash-content">
+          <div class="warn-wrap">
+            <svg class="warn-tri" viewBox="0 0 132 120" aria-hidden="true">
+              <defs>
+                <linearGradient id="warngrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#ffd644" />
+                  <stop offset="1" stop-color="#e8a616" />
+                </linearGradient>
+              </defs>
+              <path class="tri-back" d="M66 14 L120 106 H12 Z" fill="#a87708"
+                stroke="#a87708" stroke-width="18" stroke-linejoin="round"
+                transform="translate(0 5)" />
+              <path d="M66 14 L120 106 H12 Z" fill="url(#warngrad)"
+                stroke="url(#warngrad)" stroke-width="18" stroke-linejoin="round" />
+              <rect x="60" y="42" width="12" height="34" rx="6" fill="#fff" />
+              <circle cx="66" cy="90" r="7.5" fill="#fff" />
+            </svg>
+          </div>
+          <h1 class="splash-title">CNC Fräsen<br />Sicherheitstraining</h1>
+          <p class="splash-sub">Trainingssimulation · Quiz · Checklisten</p>
+          <button class="splash-start">Start</button>
+        </div>
+      </section>
+
       <!-- Maschinen-Auswahl -->
       <section class="screen" id="s-maschine">
         <button class="chip back" data-back>zurück</button>
@@ -40,7 +68,7 @@
         <div class="menu-stack">
           <button class="menu-card" data-go="maschine" data-mode="training">Trainingssimulation</button>
           <button class="menu-card" data-go="quizmenu">Quiz</button>
-          <button class="menu-card" data-go="module">Checklisten</button>
+          <button class="menu-card" data-go="maschine" data-mode="checklists">Checklisten</button>
         </div>
       </section>
 
@@ -48,7 +76,7 @@
       <section class="screen" id="s-quizmenu">
         <button class="chip back" data-back>zurück</button>
         <div class="menu-stack two">
-          <button class="menu-card" data-go="kamera" data-mode="arquiz">AR Quiz</button>
+          <button class="menu-card" data-go="maschine" data-mode="arquiz">AR Quiz</button>
           <button class="menu-card" data-go="duell">Quiz Duell</button>
         </div>
       </section>
