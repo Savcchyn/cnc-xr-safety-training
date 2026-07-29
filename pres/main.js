@@ -36,13 +36,35 @@ slides.forEach((s, i) => {
 
 function goTo(index) {
   current = Math.max(0, Math.min(slides.length - 1, index))
-  slides.forEach((s, i) => s.classList.toggle('active', i === current))
+  slides.forEach((s, i) => {
+    s.classList.toggle('active', i === current)
+    s.classList.toggle('prev', i < current)
+  })
   dotsEl.querySelectorAll('button').forEach((d, i) => d.classList.toggle('active', i === current))
   nav.classList.toggle('on-start', current === 0)
-  nav.classList.toggle('fs-low', ['produkt', 'webdemo'].includes(slides[current].id))
+  nav.classList.toggle('fs-low', ['produkt', 'webdemo', 'arapp'].includes(slides[current].id))
   history.replaceState(null, '', `#${slides[current].id}`)
   if (slides[current].id === 'webdemo') mountDemo()
   if (slides[current].id === 'arapp') mountAr()
+}
+
+/* Leichte Aufbau-Animationen: Top-Level-Blöcke jeder Slide staffeln sich
+   ein; ausgewählte Container staggern ihre Kinder einzeln. Elemente mit
+   eigenem Transform (z.B. zentrierte Absolute) bleiben unangetastet. */
+function prepAnimations() {
+  const expand = ['.start-columns', '.brief', '.feature-grid', '.workflow-row', '.flow-map']
+  slides.forEach((slide) => {
+    const list = []
+    for (const el of slide.children) {
+      if (expand.some((sel) => el.matches(sel))) list.push(...el.children)
+      else list.push(el)
+    }
+    list.forEach((el, i) => {
+      if (getComputedStyle(el).transform !== 'none') return
+      el.classList.add('anim')
+      el.style.setProperty('--d', `${0.3 + i * 0.07}s`)
+    })
+  })
 }
 
 nav.querySelector('.nav-prev').addEventListener('click', () => goTo(current - 1))
@@ -147,9 +169,13 @@ USERFLOW.forEach((station, i) => {
   node.className = 'flow-node'
   node.style.gridColumn = station.col
   node.style.gridRow = station.row
-  if (station.row === 1 && station.col < 7) node.classList.add('has-arrow')
-  if (station.row > 1) node.classList.add('branch')
-  node.innerHTML = `<img src="/thumbs/${station.thumb}.png" alt="" /><span>${station.title}</span>`
+  const marks = (station.marks || [])
+    .map((m) => `<span class="mark ${m}">${{ right: '→', up: '↑', down: '↓' }[m]}</span>`)
+    .join('')
+  node.innerHTML = `
+    <span class="nlabel">${station.title}</span>
+    <span class="nimg"><img src="/thumbs/${station.thumb}.png" alt="" /></span>
+    ${marks}`
   node.addEventListener('click', () => setFlowStep(i))
   flowMap.appendChild(node)
 })
@@ -244,5 +270,6 @@ if (SHAPESXR_URL) {
 
 /* ---------------- Start ---------------- */
 
+prepAnimations()
 const initial = slides.findIndex((s) => `#${s.id}` === location.hash)
 goTo(initial >= 0 ? initial : 0)
