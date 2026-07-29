@@ -85,7 +85,7 @@ export const FEATURES = [
         key: 'quiz',
         label: 'Quiz',
         usp: 'experience',
-        thumb: 'quiz',
+        thumb: 'quizduell',
         text: 'Jeder Interaktionspunkt stellt eine echte Entscheidung: Was gibt es hier zu tun? Die falsche Option sieht oft harmlos aus — wie in der Realität. Das System bewertet nicht sofort. Es merkt sich.',
       },
       {
