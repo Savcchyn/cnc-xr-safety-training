@@ -857,6 +857,14 @@ body {
   flex: 0 0 auto;
 }
 
+/* Dezente Side Note: verwendete Programme */
+.toolstack {
+  font-size: clamp(11px, 0.9vw, 13px);
+  letter-spacing: 0.03em;
+  opacity: 0.55;
+  margin: 22px 0 12px;
+}
+
 /* ---------- Workflow auf Titel-Blau: Neumorphism in Blau, Weiß & Schwarz ---------- */
 #workflow .wf-card {
   background: var(--blue);

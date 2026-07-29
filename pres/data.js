@@ -273,65 +273,37 @@ export const WORKFLOW = [
   {
     n: 1,
     title: 'ReBriefing',
-    points: [
-      'Empathize & Define: Problem statt Aufgabe — „Warum scheitern Sicherheitstrainings?"',
-      'Perspektive der Bediener eingenommen, Annahmen hinterfragt',
-      'Product Goal: Wahrnehmung statt Wissensvermittlung',
-    ],
+    points: ['Problem statt Aufgabe', 'Annahmen hinterfragt', 'Product Goal definiert'],
   },
   {
     n: 2,
     title: 'Research',
-    points: [
-      'Feldwissen gesammelt: echte Checklisten, DGUV-Regeln, Unfallursachen',
-      'Insights verdichtet: Routine und Zeitdruck schlagen Unwissen',
-      'Backlog befüllt: Routinen-Checklisten — 3 Maschinen × 6 Module',
-    ],
+    points: ['Feldwissen gesammelt', 'Insights verdichtet', 'Backlog befüllt'],
   },
   {
     n: 3,
     title: 'Ideation',
-    points: [
-      'Divergieren: viele Ansätze sammeln — erst ohne Bewertung',
-      'Konvergieren: nach Impact und Machbarkeit priorisiert',
-      'Entscheidung: Konsequenz statt Korrektur als Kernmechanik',
-    ],
+    points: ['Divergieren ohne Bewertung', 'Konvergieren nach Impact', 'Kernmechanik entschieden'],
   },
   {
     n: 4,
     title: 'Concept',
-    points: [
-      'System definiert: Quest-Module, Zeitdruck-Modus, Spatial Modes',
-      'Userflow & Wireframes als testbare Hypothesen',
-      'MVP-Schnitt: was der Prototyp beweisen muss — und was nicht',
-    ],
+    points: ['System & Userflow', 'Hypothesen formuliert', 'MVP geschnitten'],
   },
   {
     n: 5,
     title: 'Design',
-    points: [
-      'Design-System aufgebaut: Neumorphism-UI, Orange & Charcoal',
-      'Key Visuals für Maschinen & Lernkarten produziert',
-      'Jede Entscheidung an der Kernidee gespiegelt — Design Rationale',
-    ],
+    points: ['Design-System aufgebaut', 'Key Visuals produziert', 'Design Rationale geprüft'],
   },
   {
     n: 6,
     title: 'Prototyping',
-    points: [
-      'Spatial Draft im Raum — im echten Maßstab statt auf Papier',
-      'Iterative Sprints: Web-3D-Prototyp & AR-Klick-Dummy',
-      'Jedes Inkrement sofort live testbar — Feedback fließt direkt zurück',
-    ],
+    points: ['Spatial Draft räumlich', 'Iterative Sprints', 'Inkremente live testbar'],
   },
   {
     n: 7,
     title: 'Presentation',
-    points: [
-      'Sprint Review: der Case als erlebbares Inkrement — eine URL',
-      'Live-Demo statt Folienversprechen: testen statt behaupten',
-      'Retrospektive: der Prozess bleibt sichtbar — vom ReBriefing bis zur Live-Demo',
-    ],
+    points: ['Sprint Review live', 'Testen statt behaupten', 'Retrospektive sichtbar'],
   },
 ]
 
